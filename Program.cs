@@ -1,16 +1,20 @@
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+﻿using Platform.Migrations;
+using Umbraco.Cms.Core.Notifications;
+
+var builder = WebApplication.CreateBuilder(args);
 
 builder.CreateUmbracoBuilder()
     .AddBackOffice()
     .AddWebsite()
     .AddDeliveryApi()
     .AddComposers()
+    // ── Platform migratie registreren ──────────────────────────
+    .AddNotificationHandler<UmbracoApplicationStartedNotification, PlatformMigratieHandler>()
     .Build();
 
-WebApplication app = builder.Build();
+var app = builder.Build();
 
 await app.BootUmbracoAsync();
-
 
 app.UseUmbraco()
     .WithMiddleware(u =>
