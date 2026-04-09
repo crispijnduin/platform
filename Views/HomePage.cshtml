@@ -1,0 +1,64 @@
+﻿@{
+    Layout = null;
+    var seoTitel       = Model.Value<string>("seoTitel");
+    var seoOmschrijving = Model.Value<string>("seoOmschrijving");
+    var introTekst     = Model.Value<string>("introTekst");
+    var children       = Model.Children().Where(x => x.IsVisible());
+}
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(string.IsNullOrEmpty(seoTitel) ? Model.Name : seoTitel)</title>
+    @if (!string.IsNullOrEmpty(seoOmschrijving)) {
+        <meta name="description" content="@seoOmschrijving" />
+    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #fdf6ee; --surface: #ffffff; --border: #ddd0c4;
+            --accent: #ff6b35; --text: #2d2016; --text-dim: #9e8a78; --radius: 14px;
+        }
+        body {
+            background: var(--bg);
+            background-image: radial-gradient(circle, #e8d8c8 1.5px, transparent 1.5px);
+            background-size: 28px 28px;
+            color: var(--text);
+            font-family: Nunito, Segoe UI, system-ui, sans-serif;
+            min-height: 100vh; padding: 2rem 1rem;
+        }
+        .hero { max-width: 700px; margin: 3rem auto 2.5rem; text-align: center; }
+        .hero h1 { font-size: 2.5rem; font-weight: 800; color: var(--accent); line-height: 1.2; }
+        .hero p  { margin-top: 1rem; font-size: 1.1rem; color: var(--text-dim); line-height: 1.6; }
+        .nav-cards { max-width: 700px; margin: 0 auto; display: grid; gap: 1rem; }
+        .nav-card {
+            background: var(--surface); border: 2px solid var(--border);
+            border-radius: var(--radius); padding: 1.25rem 1.5rem;
+            text-decoration: none; color: var(--text); font-weight: 700; font-size: 1.1rem;
+            display: flex; align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+            transition: border-color .2s, box-shadow .2s, transform .15s;
+        }
+        .nav-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 16px rgba(255,107,53,.15);
+            transform: translateY(-2px);
+        }
+        .nav-card::after { content: '→'; margin-left: auto; color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>@Model.Name</h1>
+        @if (!string.IsNullOrEmpty(introTekst)) { <p>@introTekst</p> }
+    </div>
+    <div class="nav-cards">
+        @foreach (var child in children) {
+            <a class="nav-card" href="@child.Url()">@child.Name</a>
+        }
+    </div>
+</body>
+</html>

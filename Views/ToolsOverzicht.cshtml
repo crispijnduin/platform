@@ -1,0 +1,91 @@
+﻿@{
+    Layout = null;
+    var tools  = Model.Children().Where(x => x.IsVisible()).ToList();
+    var parent = Model.Parent;
+}
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.Name</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #fdf6ee; --surface: #ffffff; --border: #ddd0c4;
+            --accent: #ff6b35; --accent2: #ffb703;
+            --text: #2d2016; --text-dim: #9e8a78; --radius: 14px;
+        }
+        body {
+            background: var(--bg);
+            background-image: radial-gradient(circle, #e8d8c8 1.5px, transparent 1.5px);
+            background-size: 28px 28px;
+            color: var(--text); font-family: Nunito, Segoe UI, system-ui, sans-serif;
+            min-height: 100vh; padding: 1.5rem 1rem 3rem;
+        }
+        .topbar { max-width: 920px; margin: 0 auto 2rem; display: flex; align-items: center; gap: 1rem; }
+        .back-link {
+            text-decoration: none; color: var(--text-dim); font-weight: 700; font-size: .9rem;
+            display: flex; align-items: center; gap: .35rem; transition: color .2s;
+        }
+        .back-link:hover { color: var(--accent); }
+        h1 { font-size: 1.75rem; font-weight: 800; }
+        .tools-grid {
+            max-width: 920px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;
+        }
+        .tool-card {
+            background: var(--surface); border: 2px solid var(--border);
+            border-radius: var(--radius); padding: 1.25rem;
+            text-decoration: none; color: var(--text);
+            display: flex; flex-direction: column; gap: .5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,.06); position: relative;
+            transition: border-color .2s, box-shadow .2s, transform .15s;
+        }
+        .tool-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 16px rgba(255,107,53,.15);
+            transform: translateY(-2px);
+        }
+        .tool-emoji  { font-size: 2.25rem; line-height: 1; }
+        .tool-name   { font-weight: 800; font-size: 1rem; }
+        .tool-cat    { font-size: .78rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em; }
+        .tool-desc   { font-size: .875rem; color: var(--text-dim); line-height: 1.4; }
+        .premium-badge {
+            position: absolute; top: .75rem; right: .75rem;
+            background: var(--accent2); color: #7a5800;
+            font-size: .7rem; font-weight: 800; padding: .2rem .5rem; border-radius: 20px;
+        }
+        .empty { max-width: 920px; margin: 4rem auto; text-align: center; color: var(--text-dim); font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        @if (parent != null) {
+            <a class="back-link" href="@parent.Url()">← @parent.Name</a>
+            <span style="color:var(--border)">|</span>
+        }
+        <h1>@Model.Name</h1>
+    </div>
+    @if (tools.Any()) {
+        <div class="tools-grid">
+            @foreach (var tool in tools) {
+                var emoji       = tool.Value<string>("emoji");
+                var categorie   = tool.Value<string>("categorie");
+                var beschrijving = tool.Value<string>("beschrijving");
+                var isPremium   = tool.Value<bool>("isPremium");
+                <a class="tool-card" href="@tool.Url()">
+                    @if (isPremium) { <span class="premium-badge">⭐ Premium</span> }
+                    @if (!string.IsNullOrEmpty(emoji))       { <div class="tool-emoji">@emoji</div> }
+                    <div class="tool-name">@tool.Name</div>
+                    @if (!string.IsNullOrEmpty(categorie))   { <div class="tool-cat">@categorie</div> }
+                    @if (!string.IsNullOrEmpty(beschrijving)){ <div class="tool-desc">@beschrijving</div> }
+                </a>
+            }
+        </div>
+    } else {
+        <div class="empty">Nog geen tools gepubliceerd.</div>
+    }
+</body>
+</html>

@@ -1,0 +1,73 @@
+﻿@{
+    Layout = null;
+    var toolUrl     = Model.Value<string>("toolUrl");
+    var emoji       = Model.Value<string>("emoji");
+    var isPremium   = Model.Value<bool>("isPremium");
+    var parent      = Model.Parent;
+}
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.Name</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --surface: #ffffff; --border: #ddd0c4; --bg: #fdf6ee;
+            --accent: #ff6b35; --accent2: #ffb703;
+            --text: #2d2016; --text-dim: #9e8a78; --bar-h: 52px;
+        }
+        html, body { height: 100%; overflow: hidden; font-family: Nunito, Segoe UI, system-ui, sans-serif; }
+        .topbar {
+            height: var(--bar-h); background: var(--surface); border-bottom: 2px solid var(--border);
+            display: flex; align-items: center; gap: 1rem; padding: 0 1.25rem;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+        }
+        .back-link {
+            text-decoration: none; color: var(--text-dim); font-weight: 700; font-size: .85rem;
+            display: flex; align-items: center; gap: .3rem; white-space: nowrap; transition: color .2s;
+        }
+        .back-link:hover { color: var(--accent); }
+        .tool-title { font-weight: 800; font-size: 1rem; color: var(--text); display: flex; align-items: center; gap: .5rem; }
+        .premium-badge {
+            background: var(--accent2); color: #7a5800;
+            font-size: .7rem; font-weight: 800; padding: .2rem .5rem; border-radius: 20px;
+        }
+        .tool-frame {
+            position: fixed; top: var(--bar-h); left: 0; right: 0; bottom: 0;
+            width: 100%; height: calc(100% - var(--bar-h)); border: none;
+        }
+        .no-url {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: calc(100vh - var(--bar-h)); margin-top: var(--bar-h);
+            color: var(--text-dim); background: var(--bg);
+            background-image: radial-gradient(circle, #e8d8c8 1.5px, transparent 1.5px);
+            background-size: 28px 28px; gap: 1rem;
+        }
+        .no-url .emoji { font-size: 3rem; }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        @if (parent != null) {
+            <a class="back-link" href="@parent.Url()">← @parent.Name</a>
+            <span style="color:var(--border)">|</span>
+        }
+        <div class="tool-title">
+            @if (!string.IsNullOrEmpty(emoji)) { <span>@emoji</span> }
+            <span>@Model.Name</span>
+            @if (isPremium) { <span class="premium-badge">⭐ Premium</span> }
+        </div>
+    </div>
+    @if (!string.IsNullOrEmpty(toolUrl)) {
+        <iframe class="tool-frame" src="@toolUrl" allowfullscreen></iframe>
+    } else {
+        <div class="no-url">
+            @if (!string.IsNullOrEmpty(emoji)) { <div class="emoji">@emoji</div> }
+            <p>Geen URL ingesteld voor deze tool.</p>
+        </div>
+    }
+</body>
+</html>
