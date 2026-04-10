@@ -11,6 +11,11 @@ var app = builder.Build();
 
 await app.BootUmbracoAsync();
 
+app.UseDefaultFiles(new DefaultFilesOptions
+{
+    DefaultFileNames = new List<string> { "index.html", "index.htm" }
+});
+
 app.UseUmbraco()
     .WithMiddleware(u =>
     {
