@@ -1,15 +1,10 @@
-﻿using Platform.Migrations;
-using Umbraco.Cms.Core.Notifications;
-
-var builder = WebApplication.CreateBuilder(args);
+﻿var builder = WebApplication.CreateBuilder(args);
 
 builder.CreateUmbracoBuilder()
     .AddBackOffice()
     .AddWebsite()
     .AddDeliveryApi()
     .AddComposers()
-    // ── Platform migratie registreren ──────────────────────────
-    .AddNotificationHandler<UmbracoApplicationStartedNotification, PlatformMigratieHandler>()
     .Build();
 
 var app = builder.Build();

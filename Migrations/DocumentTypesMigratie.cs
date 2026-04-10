@@ -1,28 +1,39 @@
 ﻿using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Composing;
+using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Migrations;
+using Umbraco.Cms.Core.Strings;
 using Umbraco.Cms.Infrastructure.Migrations;
 using Umbraco.Cms.Infrastructure.Migrations.Upgrade;
 using Umbraco.Cms.Core.Scoping;
-using Umbraco.Cms.Core.Notifications;
 using Microsoft.Extensions.Logging;
 
 namespace Platform.Migrations;
 
-// ── Notification handler: wordt aangeroepen bij Umbraco startup ──
-public class PlatformMigratieHandler : INotificationHandler<UmbracoApplicationStartedNotification>
+// ── Composer: registreert de migratie-component automatisch bij startup ──
+public class PlatformMigratieComposer : IComposer
+{
+    public void Compose(IUmbracoBuilder builder)
+    {
+        builder.Components().Append<PlatformMigratieComponent>();
+    }
+}
+
+// ── Component: voert de migratie uit bij Umbraco initialisatie ──
+public class PlatformMigratieComponent : IComponent
 {
     private readonly IMigrationPlanExecutor _migrationPlanExecutor;
     private readonly ICoreScopeProvider _coreScopeProvider;
-    private readonly KeyValueService _keyValueService;
-    private readonly ILogger<PlatformMigratieHandler> _logger;
+    private readonly IKeyValueService _keyValueService;
+    private readonly ILogger<PlatformMigratieComponent> _logger;
 
-    public PlatformMigratieHandler(
+    public PlatformMigratieComponent(
         IMigrationPlanExecutor migrationPlanExecutor,
         ICoreScopeProvider coreScopeProvider,
-        KeyValueService keyValueService,
-        ILogger<PlatformMigratieHandler> logger)
+        IKeyValueService keyValueService,
+        ILogger<PlatformMigratieComponent> logger)
     {
         _migrationPlanExecutor = migrationPlanExecutor;
         _coreScopeProvider = coreScopeProvider;
@@ -30,7 +41,7 @@ public class PlatformMigratieHandler : INotificationHandler<UmbracoApplicationSt
         _logger = logger;
     }
 
-    public void Handle(UmbracoApplicationStartedNotification notification)
+    public void Initialize()
     {
         var plan = new MigrationPlan("PlatformDocumentTypes");
         plan.From(string.Empty).To<DocumentTypesMigratie>("v1.0.0");
@@ -39,6 +50,8 @@ public class PlatformMigratieHandler : INotificationHandler<UmbracoApplicationSt
         upgrader.Execute(_migrationPlanExecutor, _coreScopeProvider, _keyValueService);
         _logger.LogInformation("Platform Document Types migratie uitgevoerd.");
     }
+
+    public void Terminate() { }
 }
 
 // ── De daadwerkelijke migratie ────────────────────────────────────
@@ -47,16 +60,19 @@ public class DocumentTypesMigratie : MigrationBase
     private readonly IContentTypeService _contentTypeService;
     private readonly IDataTypeService _dataTypeService;
     private readonly IFileService _fileService;
+    private readonly IShortStringHelper _shortStringHelper;
 
     public DocumentTypesMigratie(
         IMigrationContext context,
         IContentTypeService contentTypeService,
         IDataTypeService dataTypeService,
-        IFileService fileService) : base(context)
+        IFileService fileService,
+        IShortStringHelper shortStringHelper) : base(context)
     {
         _contentTypeService = contentTypeService;
         _dataTypeService = dataTypeService;
         _fileService = fileService;
+        _shortStringHelper = shortStringHelper;
     }
 
     protected override void Migrate()
@@ -77,7 +93,7 @@ public class DocumentTypesMigratie : MigrationBase
         var dataType = HaalDataTypeOp(dataTypeNaam)
             ?? throw new Exception($"DataType '{dataTypeNaam}' niet gevonden.");
 
-        return new PropertyType(ShortStringHelper, dataType)
+        return new PropertyType(_shortStringHelper, dataType)
         {
             Name        = naam,
             Alias       = alias,
@@ -92,7 +108,7 @@ public class DocumentTypesMigratie : MigrationBase
         if (_contentTypeService.Get("homePage") != null) return;
 
         var template = _fileService.GetTemplate("HomePage");
-        var ct = new ContentType(ShortStringHelper, -1)
+        var ct = new ContentType(_shortStringHelper, -1)
         {
             Name        = "HomePage",
             Alias       = "homePage",
@@ -120,7 +136,7 @@ public class DocumentTypesMigratie : MigrationBase
         if (_contentTypeService.Get("toolsOverzicht") != null) return;
 
         var template = _fileService.GetTemplate("ToolsOverzicht");
-        var ct = new ContentType(ShortStringHelper, -1)
+        var ct = new ContentType(_shortStringHelper, -1)
         {
             Name        = "ToolsOverzicht",
             Alias       = "toolsOverzicht",
@@ -141,7 +157,7 @@ public class DocumentTypesMigratie : MigrationBase
         if (_contentTypeService.Get("toolPagina") != null) return;
 
         var template = _fileService.GetTemplate("ToolPagina");
-        var ct = new ContentType(ShortStringHelper, -1)
+        var ct = new ContentType(_shortStringHelper, -1)
         {
             Name        = "ToolPagina",
             Alias       = "toolPagina",
@@ -178,7 +194,7 @@ public class DocumentTypesMigratie : MigrationBase
         if (!homePage.AllowedContentTypes!.Any(x => x.Alias == "toolsOverzicht"))
         {
             var allowed = homePage.AllowedContentTypes!.ToList();
-            allowed.Add(new ContentTypeSort(toolsOverzicht.Key, allowed.Count, toolsOverzicht.Alias));
+            allowed.Add(new ContentTypeSort(new Lazy<int>(() => toolsOverzicht.Id), allowed.Count, toolsOverzicht.Alias));
             homePage.AllowedContentTypes = allowed;
             _contentTypeService.Save(homePage);
         }
@@ -187,7 +203,7 @@ public class DocumentTypesMigratie : MigrationBase
         if (!toolsOverzicht.AllowedContentTypes!.Any(x => x.Alias == "toolPagina"))
         {
             var allowed = toolsOverzicht.AllowedContentTypes!.ToList();
-            allowed.Add(new ContentTypeSort(toolPagina.Key, allowed.Count, toolPagina.Alias));
+            allowed.Add(new ContentTypeSort(new Lazy<int>(() => toolPagina.Id), allowed.Count, toolPagina.Alias));
             toolsOverzicht.AllowedContentTypes = allowed;
             _contentTypeService.Save(toolsOverzicht);
         }
