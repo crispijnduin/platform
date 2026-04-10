@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digiboard Platform — Interactieve tools voor het digibord</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .search-bar {
+      display: flex; align-items: center; gap: .75rem;
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+      border-radius: var(--radius); padding: .75rem 1.25rem;
+      max-width: 420px; margin-bottom: 2rem; backdrop-filter: blur(8px);
+    }
+    .search-bar input {
+      background: none; border: none; outline: none;
+      color: #fff; font-size: .95rem; flex: 1;
+      font-family: var(--font);
+    }
+    .search-bar input::placeholder { color: rgba(255,255,255,.55); }
+    .search-icon { color: rgba(255,255,255,.6); font-size: 1rem; }
+
+    .testimonials-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
+    }
+    .testimonial {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+    }
+    .testimonial-stars { color: #F59E0B; font-size: 1rem; margin-bottom: .75rem; }
+    .testimonial-text { font-size: .92rem; color: var(--text-muted); margin-bottom: 1rem; font-style: italic; }
+    .testimonial-author { display: flex; align-items: center; gap: .75rem; }
+    .testimonial-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 700; color: #fff;
+    }
+    .testimonial-name { font-size: .88rem; font-weight: 600; color: var(--text); }
+    .testimonial-role { font-size: .78rem; color: var(--text-light); }
+
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
+    }
+    .pricing-card {
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: var(--radius); padding: 2rem;
+    }
+    .pricing-card.featured {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79,70,229,.12);
+    }
+    .pricing-label {
+      font-size: .78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--primary); margin-bottom: .5rem;
+    }
+    .pricing-price { font-size: 2.75rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .pricing-period { font-size: .9rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.5rem; }
+    .pricing-features li { font-size: .9rem; color: var(--text-muted); display: flex; align-items: center; gap: .5rem; }
+    .pricing-features li::before { content: '✓'; color: var(--accent); font-weight: 700; }
+
+    .section-label {
+      font-size: .82rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--primary); margin-bottom: .75rem;
+    }
+
+    @media (max-width: 900px) {
+      .testimonials-grid, .pricing-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ====== NAVIGATION ====== -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">📋</div>
+      Digiboard
+    </a>
+    <ul class="nav-links">
+      <li><a href="#tools" class="active">Tools</a></li>
+      <li><a href="#hoe-werkt-het">Hoe werkt het?</a></li>
+      <li><a href="#voor-scholen">Voor scholen</a></li>
+      <li><a href="#prijzen">Prijzen</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="#" class="btn btn-ghost btn-sm">Inloggen</a>
+      <a href="#" class="btn btn-primary btn-sm">Gratis starten</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ====== HERO ====== -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">✨ Nieuw: 10 interactieve tools beschikbaar</div>
+      <h1>Maak elke les onvergetelijk met je digibord</h1>
+      <p>Het complete platform met interactieve tools voor het digibord. Maak lessen leuker, actiever en effectiever voor alle leeftijden.</p>
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Zoek een tool, bijv. 'timer' of 'rekenen'..." />
+      </div>
+      <div class="hero-actions">
+        <a href="#" class="btn btn-white btn-lg">Gratis starten →</a>
+        <a href="#tools" class="btn btn-lg" style="color:#fff;border:2px solid rgba(255,255,255,.4)">Bekijk alle tools</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-num">10+</div>
+          <div class="hero-stat-label">Digibord tools</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">2.400+</div>
+          <div class="hero-stat-label">Scholen actief</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">98%</div>
+          <div class="hero-stat-label">Tevreden leraren</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-screen">
+        <div class="hero-tool-card">
+          <div class="hero-tool-icon">🎲</div>
+          <div class="hero-tool-name">Willekeurige Kiezer</div>
+          <div class="hero-tool-cat">Algemeen</div>
+        </div>
+        <div class="hero-tool-card">
+          <div class="hero-tool-icon">⏱️</div>
+          <div class="hero-tool-name">Timer</div>
+          <div class="hero-tool-cat">Klasbeheer</div>
+        </div>
+        <div class="hero-tool-card">
+          <div class="hero-tool-icon">🎡</div>
+          <div class="hero-tool-name">Draai het Wiel</div>
+          <div class="hero-tool-cat">Spelletjes</div>
+        </div>
+        <div class="hero-tool-card">
+          <div class="hero-tool-icon">📊</div>
+          <div class="hero-tool-name">Staafdiagram</div>
+          <div class="hero-tool-cat">Rekenen</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== FEATURES ====== -->
+<section class="section" style="background:#fff;">
+  <div class="container">
+    <div class="text-center mb-4">
+      <div class="section-label">Waarom Digiboard?</div>
+      <h2>Alles wat je nodig hebt voor een interactieve les</h2>
+      <p class="mt-2" style="max-width:560px;margin-left:auto;margin-right:auto">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Van timer tot spelletjes — onze tools werken direct op je digibord, zonder installatie.
+      </p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#EEF2FF;">🚀</div>
+        <h3>Direct klaar voor gebruik</h3>
+        <p>Geen installatie of account nodig. Open de tool, projecteer op je digibord en begin. Zo eenvoudig is het.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#F0FDF4;">🎯</div>
+        <h3>Ontworpen voor het klaslokaal</h3>
+        <p>Alle tools zijn speciaal ontwikkeld voor gebruik voor de klas. Grote knoppen, heldere kleuren en intuïtief te bedienen.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#FFF7ED;">⚡</div>
+        <h3>Altijd up-to-date</h3>
+        <p>We voegen continu nieuwe tools toe op basis van feedback van leraren. Jouw input bepaalt wat we bouwen.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== TOOLS ====== -->
+<section class="section" id="tools">
+  <div class="container">
+    <div class="tools-header">
+      <div>
+        <div class="section-label">Digibord Tools</div>
+        <h2>10 tools voor elke les</h2>
+      </div>
+      <a href="#" class="btn btn-outline btn-sm">Alle tools →</a>
+    </div>
+
+    <div class="categories">
+      <button class="cat-btn active" onclick="filterTools(this,'all')">Alle tools</button>
+      <button class="cat-btn" onclick="filterTools(this,'rekenen')">🔢 Rekenen</button>
+      <button class="cat-btn" onclick="filterTools(this,'taal')">📖 Taal</button>
+      <button class="cat-btn" onclick="filterTools(this,'spelletjes')">🎮 Spelletjes</button>
+      <button class="cat-btn" onclick="filterTools(this,'klasbeheer')">✋ Klasbeheer</button>
+      <button class="cat-btn" onclick="filterTools(this,'muziek')">🎵 Muziek</button>
+    </div>
+
+    <div class="tools-grid" id="toolsGrid">
+
+      <!-- 1: Willekeurige Kiezer -->
+      <a href="tools/random-picker.html" class="tool-card" data-cat="klasbeheer">
+        <div class="tool-card-thumb" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">🎲</div>
+        <div class="tool-card-body">
+          <div class="tool-card-cat">Klasbeheer</div>
+          <h4>Willekeurige Kiezer</h4>
+          <p>Kies willekeurig een leerling of groep. Eerlijk, snel en voor iedereen zichtbaar.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span class="tool-badge">Populair</span>
+          <span class="tool-open-btn">Openen →</span>
+        </div>
+      </a>
+
+      <!-- 2: Timer -->
+      <a href="tools/timer.html" class="tool-card" data-cat="klasbeheer">
+        <div class="tool-card-thumb" style="background:linear-gradient(135deg,#EF4444,#F97316)">⏱️</div>
+        <div class="tool-card-body">
+          <div class="tool-card-cat">Klasbeheer</div>
+          <h4>Timer</h4>
+          <p>Afteltimer voor toetsen, werkstukken of activiteiten. Groot en goed zichtbaar op het digibord.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span class="tool-badge">Essentieel</span>
+          <span class="tool-open-btn">Openen →</span>
+        </div>
+      </a>
+
+      <!-- 3: Draai het Wiel -->
+      <a href="tools/spin-wheel.html" class="tool-card" data-cat="spelletjes">
+        <div class="tool-card-thumb" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">🎡</div>
+        <div class="tool-card-body">
+          <div class="tool-card-cat">Spelletjes</div>
+          <h4>Draai het Wiel</h4>
+          <p>Voeg namen of opdrachten toe en draai het wiel. Spannend voor de hele klas!</p>
+        </div>
+        <div class="tool-card-footer">
+          <span class="tool-badge">Nieuw</span>
+          <span class="tool-open-btn">Openen →</span>
+        </div>
+      </a>
+
+      <!-- 4: Staafdiagram -->
+      <a href="tools/bar-chart.html" class="tool-card" data-cat="rekenen">
+        <div class="tool-card-thumb" style="background:linear-gradient(135deg,#10B981,#3B82F6)">📊</div>
+        <div class="tool-card-body">
+          <div class="tool-card-cat">Rekenen</div>
+          <h4>Staafdiagram</h4>
+          <p>Maak live staafdiagrammen op het digibord. Ideaal voor wiskunde en statistiek.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span class="tool-badge">Rekenen</span>
+          <span class="tool-open-btn">Openen →</span>
+        </div>
+      </a>
+
+      <!-- 5: Handopsteker -->
+      <a href="tools/hand-raiser.html" class="tool-card" data-cat="klasbeheer">
+        <div class="tool-card-thumb" style="background:linear-gradient(135deg,#8B5CF6,#4F46E5)">✋</div>
+        <div class="tool-card-body">
+          <div class="tool-card-cat">Klasbeheer</div>
+          <h4>Handopsteker</h4>
+          <p>Leerlingen steken digitaal hun hand op. Zie wie er iets wil zeggen zonder chaos.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span class="tool-badge">Klasbeheer</span>
+          <span class="tool-open-btn">Openen →</span>
+        </div>
+      </a>
+
+      <!-- 6: Tafels Oefenen -->
+      <a href="tools/multiplication.html" class="tool-card" data-cat="rekenen">
+        <div class="tool-card-thumb" style="background:linear-gradient(135deg,#3B82F6,#06B6D4)">🔢</div>
+        <div class="tool-card-body">
+          <div class="tool-card-cat">Rekenen</div>
+          <h4>Tafels Oefenen</h4>
+          <p>Oefen vermenigvuldigingstafels samen voor de klas. Met timer en scoretelling.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span class="tool-badge">Rekenen</span>
+          <span class="tool-open-btn">Openen →</span>
+        </div>
+      </a>
+
+      <!-- 7: Woordmuur -->
+      <a href="tools/word-wall.html" class="tool-card" data-cat="taal">
+        <div class="tool-card-thumb" style="background:linear-gradient(135deg,#EC4899,#8B5CF6)">📝</div>
+        <div class="tool-card-body">
+          <div class="tool-card-cat">Taal</div>
+          <h4>Woordmuur</h4>
+          <p>Bouw samen een woordmuur op het digibord. Perfect voor woordenschat en spelling.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span class="tool-badge">Taal</span>
+          <span class="tool-open-btn">Openen →</span>
+        </div>
+      </a>
+
+      <!-- 8: Thermometer -->
+      <a href="tools/thermometer.html" class="tool-card" data-cat="rekenen">
+        <div class="tool-card-thumb" style="background:linear-gradient(135deg,#F97316,#EF4444)">🌡️</div>
+        <div class="tool-card-body">
+          <div class="tool-card-cat">Rekenen / Natuur</div>
+          <h4>Thermometer</h4>
+          <p>Interactieve thermometer voor het digibord. Leer leerlingen temperatuur aflezen.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span class="tool-badge">Natuur</span>
+          <span class="tool-open-btn">Openen →</span>
+        </div>
+      </a>
+
+      <!-- 9: Muziekspeler -->
+      <a href="tools/music-player.html" class="tool-card" data-cat="muziek">
+        <div class="tool-card-thumb" style="background:linear-gradient(135deg,#06B6D4,#3B82F6)">🎵</div>
+        <div class="tool-card-body">
+          <div class="tool-card-cat">Muziek</div>
+          <h4>Muziekspeler</h4>
+          <p>Speel achtergrondmuziek af tijdens zelfstandig werken of als beloning voor de klas.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span class="tool-badge">Muziek</span>
+          <span class="tool-open-btn">Openen →</span>
+        </div>
+      </a>
+
+      <!-- 10: Woordraadsel -->
+      <a href="tools/word-scramble.html" class="tool-card" data-cat="taal">
+        <div class="tool-card-thumb" style="background:linear-gradient(135deg,#84CC16,#10B981)">🎮</div>
+        <div class="tool-card-body">
+          <div class="tool-card-cat">Taal / Spelletjes</div>
+          <h4>Woordraadsel</h4>
+          <p>Raad het door elkaar gehusselde woord. Leuk voor woordenschat en spelling voor de klas.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span class="tool-badge">Spelletjes</span>
+          <span class="tool-open-btn">Openen →</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ====== HOW IT WORKS ====== -->
+<section class="section" id="hoe-werkt-het" style="background:#fff;">
+  <div class="container">
+    <div class="text-center mb-4">
+      <div class="section-label">Hoe werkt het?</div>
+      <h2>In 4 stappen aan de slag</h2>
+    </div>
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-num">1</div>
+        <h4>Kies een tool</h4>
+        <p>Blader door onze tools en klik op de tool die je wilt gebruiken in de les.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-num">2</div>
+        <h4>Stel in</h4>
+        <p>Pas de tool aan op jouw les: voeg namen toe, kies een tijdsduur of stel vragen in.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-num">3</div>
+        <h4>Projecteer</h4>
+        <p>Open de tool op het digibord en ga direct aan de slag. Geen technische kennis vereist.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-num">4</div>
+        <h4>Geniet van de les</h4>
+        <p>Leerlingen zijn meer betrokken, de les verloopt soepeler en je klasse komt tot leven!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== FOR SCHOOLS ====== -->
+<section class="section" id="voor-scholen">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;">
+      <div>
+        <div class="section-label">Voor scholen</div>
+        <h2>Geschikt voor het hele team</h2>
+        <p class="mt-2">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+        </p>
+        <ul style="list-style:none;margin-top:1.5rem;display:flex;flex-direction:column;gap:.85rem;">
+          <li style="display:flex;align-items:flex-start;gap:.75rem;">
+            <span style="color:var(--accent);font-size:1.1rem;margin-top:.1rem;">✓</span>
+            <div>
+              <strong style="color:var(--text);">Één platform voor de hele school</strong>
+              <p style="font-size:.9rem;margin-top:.2rem;">Alle leraren op één account. Beheer eenvoudig wie toegang heeft.</p>
+            </div>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.75rem;">
+            <span style="color:var(--accent);font-size:1.1rem;margin-top:.1rem;">✓</span>
+            <div>
+              <strong style="color:var(--text);">Geen installatie nodig</strong>
+              <p style="font-size:.9rem;margin-top:.2rem;">Werkt in elke browser, op elk digibord en elk apparaat.</p>
+            </div>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.75rem;">
+            <span style="color:var(--accent);font-size:1.1rem;margin-top:.1rem;">✓</span>
+            <div>
+              <strong style="color:var(--text);">AVG-proof</strong>
+              <p style="font-size:.9rem;margin-top:.2rem;">Alle data wordt veilig opgeslagen conform de AVG-wetgeving.</p>
+            </div>
+          </li>
+        </ul>
+        <div class="mt-4">
+          <a href="#" class="btn btn-primary">Neem contact op →</a>
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,#EEF2FF,#F5F3FF);border-radius:var(--radius-lg);padding:2.5rem;text-align:center;">
+        <div style="font-size:4rem;margin-bottom:1rem;">🏫</div>
+        <h3>Schoollicentie</h3>
+        <p class="mt-2">Alle leraren. Alle tools. Onbeperkt gebruik. Eén factuur voor de school.</p>
+        <div style="background:var(--surface);border-radius:var(--radius);padding:1.25rem;margin:1.5rem 0;">
+          <div style="font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Vanaf</div>
+          <div style="font-size:2.5rem;font-weight:800;color:var(--text);">€ 299</div>
+          <div style="color:var(--text-muted);font-size:.9rem;">per schooljaar · onbeperkt gebruikers</div>
+        </div>
+        <a href="#" class="btn btn-primary" style="width:100%;justify-content:center;">Vraag offerte aan</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== TESTIMONIALS ====== -->
+<section class="section" style="background:#fff;">
+  <div class="container">
+    <div class="text-center mb-4">
+      <div class="section-label">Wat leraren zeggen</div>
+      <h2>Geliefd door leraren in heel Nederland</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"De Willekeurige Kiezer gebruik ik elke dag. Leerlingen vinden het spannend en het is super eerlijk. Ik zou niet meer zonder willen."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:var(--primary);">M</div>
+          <div>
+            <div class="testimonial-name">Mevrouw de Vries</div>
+            <div class="testimonial-role">Groep 5, Basisschool De Zon</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Eindelijk een platform dat écht werkt op ons digibord. De timer is helder, de tools laden snel en mijn leerlingen zijn veel actiever tijdens de les."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:var(--secondary);">J</div>
+          <div>
+            <div class="testimonial-name">Jochem Bakker</div>
+            <div class="testimonial-role">Groep 7, IKC De Regenboog</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Het Woordraadsel is een hit in mijn klas! Leerlingen vragen zelf wanneer we het weer doen. Geweldige manier om spelend te leren."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:var(--accent);">S</div>
+          <div>
+            <div class="testimonial-name">Sonja Pieters</div>
+            <div class="testimonial-role">Groep 4, OBS Het Kompas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== PRICING ====== -->
+<section class="section" id="prijzen">
+  <div class="container">
+    <div class="text-center mb-4">
+      <div class="section-label">Prijzen</div>
+      <h2>Eerlijk en transparant</h2>
+      <p class="mt-2">Kies het abonnement dat bij jou past. Altijd 30 dagen gratis proberen.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-label">Gratis</div>
+        <div class="pricing-price">€ 0</div>
+        <div class="pricing-period">voor altijd gratis</div>
+        <ul class="pricing-features">
+          <li>5 tools beschikbaar</li>
+          <li>Onbeperkt gebruik</li>
+          <li>Geen account nodig</li>
+        </ul>
+        <a href="#" class="btn btn-outline" style="width:100%;justify-content:center;">Gratis starten</a>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-label">Pro</div>
+        <div class="pricing-price">€ 79</div>
+        <div class="pricing-period">per jaar · per leraar</div>
+        <ul class="pricing-features">
+          <li>Alle 10+ tools</li>
+          <li>Favorieten opslaan</li>
+          <li>Klassen beheren</li>
+          <li>Geen advertenties</li>
+          <li>Prioriteitsondersteuning</li>
+        </ul>
+        <a href="#" class="btn btn-primary" style="width:100%;justify-content:center;">30 dagen gratis proberen</a>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-label">School</div>
+        <div class="pricing-price">€ 299</div>
+        <div class="pricing-period">per jaar · hele school</div>
+        <ul class="pricing-features">
+          <li>Alles van Pro</li>
+          <li>Onbeperkt gebruikers</li>
+          <li>Schoolbeheer dashboard</li>
+          <li>Factuur op naam school</li>
+          <li>Persoonlijke onboarding</li>
+        </ul>
+        <a href="#" class="btn btn-outline" style="width:100%;justify-content:center;">Offerte aanvragen</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== CTA ====== -->
+<div class="container">
+  <div class="cta-section">
+    <div class="section-label" style="color:rgba(255,255,255,.6)">Klaar om te beginnen?</div>
+    <h2>Start vandaag nog gratis</h2>
+    <p>Sluit je aan bij duizenden leraren die hun lessen al interactiever maken met Digiboard.</p>
+    <a href="#" class="btn btn-white btn-lg">Gratis account aanmaken →</a>
+  </div>
+</div>
+
+<!-- ====== FOOTER ====== -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">
+          <div class="nav-logo-icon">📋</div>
+          Digiboard
+        </div>
+        <p style="font-size:.9rem;max-width:280px;line-height:1.7;">
+          Het platform voor interactieve lessen op het digibord. Voor leraren, door leraren.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h5>Tools</h5>
+        <ul class="footer-links">
+          <li><a href="tools/random-picker.html">Willekeurige Kiezer</a></li>
+          <li><a href="tools/timer.html">Timer</a></li>
+          <li><a href="tools/spin-wheel.html">Draai het Wiel</a></li>
+          <li><a href="tools/bar-chart.html">Staafdiagram</a></li>
+          <li><a href="tools/hand-raiser.html">Handopsteker</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Meer tools</h5>
+        <ul class="footer-links">
+          <li><a href="tools/multiplication.html">Tafels Oefenen</a></li>
+          <li><a href="tools/word-wall.html">Woordmuur</a></li>
+          <li><a href="tools/thermometer.html">Thermometer</a></li>
+          <li><a href="tools/music-player.html">Muziekspeler</a></li>
+          <li><a href="tools/word-scramble.html">Woordraadsel</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Platform</h5>
+        <ul class="footer-links">
+          <li><a href="#">Over ons</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Voor scholen</a></li>
+          <li><a href="#">Prijzen</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacybeleid</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2026 Digiboard Platform · Gemaakt met ❤️ voor het onderwijs
+    </div>
+  </div>
+</footer>
+
+<script>
+function filterTools(btn, cat) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('.tool-card');
+  cards.forEach(card => {
+    if (cat === 'all' || card.dataset.cat === cat) {
+      card.style.display = '';
+      card.style.animation = 'none';
+      requestAnimationFrame(() => card.style.animation = '');
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+</script>
+</body>
+</html>

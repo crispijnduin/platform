@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thermometer — Digiboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .therm-wrap { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr 280px; gap: 1.5rem; align-items: start; }
+    .therm-main { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+    .therm-svg-wrap { position: relative; display: flex; align-items: center; gap: 2.5rem; }
+    svg.therm { width: 100px; height: 420px; }
+    .scale-labels { display: flex; flex-direction: column; justify-content: space-between; height: 340px; padding: 10px 0; }
+    .scale-label { font-size: .88rem; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: .4rem; }
+    .scale-label.highlight { color: var(--text); font-size: 1rem; }
+    .temp-display { text-align: center; }
+    .temp-value { font-size: 4.5rem; font-weight: 800; line-height: 1; letter-spacing: -.04em; }
+    .temp-unit { font-size: 1.5rem; font-weight: 700; color: var(--text-muted); }
+    .temp-desc { font-size: 1rem; font-weight: 600; color: var(--text-muted); margin-top: .5rem; }
+    .sidebar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+    .sidebar h3 { margin-bottom: 1.25rem; font-size: 1rem; }
+    input[type=range] { width: 100%; accent-color: #EF4444; height: 6px; }
+    .temp-input-row { display: flex; gap: .5rem; align-items: center; margin: 1rem 0; }
+    .temp-input-row input[type=number] { width: 90px; border: 2px solid var(--border); border-radius: 8px; padding: .6rem .75rem; font-size: 1.3rem; font-weight: 800; text-align: center; outline: none; font-family: var(--font); }
+    .temp-input-row input:focus { border-color: var(--danger); }
+    .context-btns { display: flex; flex-direction: column; gap: .4rem; margin-top: 1rem; }
+    .ctx-btn { padding: .6rem .9rem; border: 2px solid var(--border); border-radius: 8px; background: var(--bg); font-size: .88rem; font-weight: 600; cursor: pointer; text-align: left; transition: all .15s; display: flex; align-items: center; gap: .5rem; }
+    .ctx-btn:hover { border-color: var(--danger); color: var(--danger); background: #fff5f5; }
+    .scale-toggle { display: flex; gap: .5rem; margin-bottom: 1rem; }
+    .scale-toggle button { flex: 1; padding: .4rem; border: 2px solid var(--border); border-radius: 8px; font-size: .88rem; font-weight: 700; cursor: pointer; transition: all .15s; background: var(--bg); }
+    .scale-toggle button.active { background: var(--danger); color: #fff; border-color: var(--danger); }
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">📋</div>Digiboard</a>
+    <ul class="nav-links"><li><a href="../index.html#tools">← Terug naar tools</a></li></ul>
+    <div class="nav-actions"><a href="#" class="btn btn-ghost btn-sm">Inloggen</a><a href="#" class="btn btn-primary btn-sm">Gratis starten</a></div>
+  </div>
+</nav>
+<div class="tool-page-header" style="background:linear-gradient(135deg,#7c2d12,#F97316)">
+  <div class="tool-page-header-inner">
+    <div class="tool-page-icon">🌡️</div>
+    <div class="tool-page-meta">
+      <a href="../index.html#tools" class="tool-back">← Alle tools</a>
+      <h1>Thermometer</h1>
+      <p>Interactieve thermometer — leer temperatuur aflezen op het digibord.</p>
+      <span class="tool-badge">Rekenen / Natuur</span>
+    </div>
+  </div>
+</div>
+<div class="therm-wrap">
+  <div class="therm-main">
+    <div class="therm-svg-wrap">
+      <svg class="therm" viewBox="0 0 100 420" xmlns="http://www.w3.org/2000/svg">
+        <!-- Tube background -->
+        <rect x="38" y="20" width="24" height="340" rx="12" fill="#f1f5f9"/>
+        <rect x="38" y="20" width="24" height="340" rx="12" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+        <!-- Scale ticks -->
+        <g id="ticks"></g>
+        <!-- Mercury fill -->
+        <clipPath id="tubeClip">
+          <rect x="38" y="20" width="24" height="340" rx="12"/>
+        </clipPath>
+        <rect id="mercury" x="38" y="260" width="24" height="100" fill="#EF4444" clip-path="url(#tubeClip)" style="transition:y .6s,height .6s"/>
+        <!-- Bulb -->
+        <circle cx="50" cy="375" r="25" fill="#EF4444"/>
+        <circle cx="50" cy="375" r="18" fill="#f87171"/>
+        <circle cx="50" cy="20" r="12" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="2"/>
+      </svg>
+      <div class="scale-labels" id="scaleLabels"></div>
+    </div>
+    <div class="temp-display">
+      <div class="temp-value" id="tempValue" style="color:#EF4444">20</div>
+      <div class="temp-unit">°C</div>
+      <div class="temp-desc" id="tempDesc">Kamertemperatuur</div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <h3>🎛️ Instellen</h3>
+    <div class="scale-toggle">
+      <button class="active" onclick="setScale('C',this)">°C Celsius</button>
+      <button onclick="setScale('F',this)">°F Fahrenheit</button>
+    </div>
+    <label style="font-size:.85rem;font-weight:600;color:var(--text-muted)">Temperatuur aanpassen</label>
+    <input type="range" id="tempSlider" min="-30" max="110" value="20" oninput="setTemp(this.value)" style="margin:.75rem 0"/>
+    <div class="temp-input-row">
+      <input type="number" id="tempInput" value="20" min="-30" max="110" onchange="setTemp(this.value)" />
+      <span style="font-size:1.3rem;font-weight:800;color:var(--text-muted)">°C</span>
+    </div>
+    <h4 style="font-size:.9rem;margin-bottom:.6rem;color:var(--text-muted)">Voorbeelden</h4>
+    <div class="context-btns">
+      <div class="ctx-btn" onclick="setTemp(-10)">❄️ Vriezend weer (-10°C)</div>
+      <div class="ctx-btn" onclick="setTemp(0)">🌨️ Vriespunt (0°C)</div>
+      <div class="ctx-btn" onclick="setTemp(20)">🏠 Kamertemperatuur (20°C)</div>
+      <div class="ctx-btn" onclick="setTemp(37)">🤒 Lichaamstemperatuur (37°C)</div>
+      <div class="ctx-btn" onclick="setTemp(100)">♨️ Kookpunt water (100°C)</div>
+    </div>
+  </div>
+</div>
+<script>
+let currentScale = 'C';
+const MIN = -30, MAX = 110;
+
+function buildTicks() {
+  const g = document.getElementById('ticks');
+  const labels = document.getElementById('scaleLabels');
+  g.innerHTML = ''; labels.innerHTML = '';
+  const range = MAX - MIN;
+  for (let t = MIN; t <= MAX; t += 10) {
+    const pct = (t - MIN) / range;
+    const y = 20 + pct * 340;
+    const isMajor = t % 20 === 0;
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', isMajor ? 28 : 32);
+    line.setAttribute('x2', 38);
+    line.setAttribute('y1', y); line.setAttribute('y2', y);
+    line.setAttribute('stroke', '#94a3b8'); line.setAttribute('stroke-width', isMajor ? 2 : 1);
+    g.appendChild(line);
+  }
+  [MAX, 80, 60, 40, 20, 0, MIN].forEach(t => {
+    const val = currentScale === 'C' ? t : Math.round(t * 9/5 + 32);
+    const div = document.createElement('div');
+    div.className = 'scale-label' + (t % 20 === 0 ? ' highlight' : '');
+    div.textContent = val + '°' + currentScale;
+    labels.appendChild(div);
+  });
+}
+
+function setTemp(v) {
+  v = Math.max(MIN, Math.min(MAX, parseInt(v)));
+  document.getElementById('tempSlider').value = v;
+  document.getElementById('tempInput').value = v;
+  const display = currentScale === 'C' ? v : Math.round(v * 9/5 + 32);
+  document.getElementById('tempValue').textContent = display;
+  // Mercury: y goes from 360 (hot) to 20 (cold); height fills from bulb
+  const pct = (v - MIN) / (MAX - MIN);
+  const mercH = pct * 340;
+  const mercY = 360 - mercH;
+  document.getElementById('mercury').setAttribute('y', mercY);
+  document.getElementById('mercury').setAttribute('height', mercH + 15);
+  // Color
+  const color = v < 0 ? '#60a5fa' : v < 15 ? '#34d399' : v < 30 ? '#f59e0b' : '#EF4444';
+  document.getElementById('mercury').setAttribute('fill', color);
+  document.querySelector('circle[r="25"]').setAttribute('fill', color);
+  document.querySelector('circle[r="18"]').setAttribute('fill', color === '#EF4444' ? '#f87171' : color);
+  document.getElementById('tempValue').style.color = color;
+  // Description
+  const descs = [[-30,'Extreem koud ❄️'],[0,'Vriespunt 🌨️'],[10,'Koud 🧥'],[20,'Kamertemperatuur 🏠'],[30,'Warm ☀️'],[37,'Lichaamstemperatuur 🌡️'],[100,'Kookpunt water ♨️'],[110,'Gevaarlijk heet 🔥']];
+  let desc = descs[0][1];
+  descs.forEach(([t,d]) => { if (v >= t) desc = d; });
+  document.getElementById('tempDesc').textContent = desc;
+}
+function setScale(s, btn) {
+  currentScale = s;
+  document.querySelectorAll('.scale-toggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildTicks();
+  setTemp(document.getElementById('tempSlider').value);
+}
+buildTicks(); setTemp(20);
+</script>
+</body>
+</html>

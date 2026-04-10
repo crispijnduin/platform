@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tafels Oefenen — Digiboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .mult-wrap { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; }
+    .table-selector { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; margin-bottom:1.25rem; }
+    .table-selector h3 { margin-bottom:1rem; font-size:1rem; }
+    .table-btns { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .table-btn { width:52px; height:52px; border-radius:12px; border:2px solid var(--border); background:var(--bg); font-size:1.1rem; font-weight:800; cursor:pointer; transition:all .15s; }
+    .table-btn:hover { border-color:var(--primary); color:var(--primary); }
+    .table-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .quiz-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:2.5rem; text-align:center; margin-bottom:1.25rem; }
+    .question { font-size:clamp(2.5rem,8vw,5rem); font-weight:800; color:var(--text); margin:1rem 0; letter-spacing:-.03em; }
+    .answer-input { font-size:2.5rem; font-weight:800; text-align:center; border:3px solid var(--border); border-radius:var(--radius); padding:.5rem 1rem; width:180px; outline:none; font-family:var(--font); transition:border-color .2s; }
+    .answer-input:focus { border-color:var(--primary); }
+    .answer-input.correct { border-color:var(--accent); background:#f0fdf4; color:var(--accent); }
+    .answer-input.wrong { border-color:var(--danger); background:#fff5f5; color:var(--danger); animation:shake .3s; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+    .feedback { font-size:1.4rem; font-weight:800; height:2.5rem; display:flex; align-items:center; justify-content:center; margin:.75rem 0; }
+    .score-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+    .score-item { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:1.1rem; text-align:center; }
+    .score-num { font-size:2rem; font-weight:800; }
+    .score-label { font-size:.82rem; color:var(--text-muted); }
+    .progress-dots { display:flex; gap:.4rem; justify-content:center; flex-wrap:wrap; margin:.75rem 0; }
+    .dot { width:14px; height:14px; border-radius:50%; background:var(--border); transition:background .2s; }
+    .dot.ok { background:var(--accent); }
+    .dot.err { background:var(--danger); }
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">📋</div>Digiboard</a>
+    <ul class="nav-links"><li><a href="../index.html#tools">← Terug naar tools</a></li></ul>
+    <div class="nav-actions"><a href="#" class="btn btn-ghost btn-sm">Inloggen</a><a href="#" class="btn btn-primary btn-sm">Gratis starten</a></div>
+  </div>
+</nav>
+<div class="tool-page-header" style="background:linear-gradient(135deg,#1e3a5f,#3B82F6)">
+  <div class="tool-page-header-inner">
+    <div class="tool-page-icon">🔢</div>
+    <div class="tool-page-meta">
+      <a href="../index.html#tools" class="tool-back">← Alle tools</a>
+      <h1>Tafels Oefenen</h1>
+      <p>Oefen vermenigvuldigingstafels interactief op het digibord.</p>
+      <span class="tool-badge">Rekenen</span>
+    </div>
+  </div>
+</div>
+<div class="mult-wrap">
+  <div class="table-selector">
+    <h3>Kies een tafel</h3>
+    <div class="table-btns" id="tableBtns"></div>
+  </div>
+  <div class="score-bar">
+    <div class="score-item"><div class="score-num" id="scoreGood" style="color:var(--accent)">0</div><div class="score-label">✓ Goed</div></div>
+    <div class="score-item"><div class="score-num" id="scoreWrong" style="color:var(--danger)">0</div><div class="score-label">✗ Fout</div></div>
+    <div class="score-item"><div class="score-num" id="scoreStreak" style="color:var(--warning)">0</div><div class="score-label">🔥 Serie</div></div>
+  </div>
+  <div class="quiz-card" id="quizCard">
+    <div style="font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem" id="qNum">Vraag 1 / 10</div>
+    <div class="progress-dots" id="dots"></div>
+    <div class="question" id="question">Kies een tafel om te starten</div>
+    <input class="answer-input" id="answerInput" type="number" placeholder="?" onkeydown="if(event.key==='Enter')checkAnswer()" disabled />
+    <div class="feedback" id="feedback"></div>
+    <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary" id="checkBtn" onclick="checkAnswer()" disabled>Controleer</button>
+      <button class="btn btn-ghost" onclick="nextQ()" id="nextBtn" style="display:none">Volgende →</button>
+    </div>
+  </div>
+</div>
+<script>
+let selectedTable = null, questions = [], qi = 0, good = 0, wrong = 0, streak = 0, results = [];
+
+for(let i=1;i<=10;i++){
+  const btn=document.createElement('button');
+  btn.className='table-btn'; btn.textContent=i;
+  btn.onclick=()=>startTable(i,btn);
+  document.getElementById('tableBtns').appendChild(btn);
+}
+
+function startTable(n, btn) {
+  selectedTable=n;
+  document.querySelectorAll('.table-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  questions=[];
+  for(let i=1;i<=10;i++) questions.push({a:n,b:i,ans:n*i});
+  questions.sort(()=>Math.random()-.5);
+  qi=0; good=0; wrong=0; streak=0; results=[];
+  updateScores();
+  buildDots();
+  showQ();
+}
+function buildDots() {
+  const d=document.getElementById('dots');
+  d.innerHTML=questions.map((_,i)=>`<div class="dot" id="dot${i}"></div>`).join('');
+}
+function showQ() {
+  if(qi>=questions.length){ endGame(); return; }
+  const q=questions[qi];
+  document.getElementById('qNum').textContent=`Vraag ${qi+1} / ${questions.length}`;
+  document.getElementById('question').textContent=`${q.a} × ${q.b} = ?`;
+  const inp=document.getElementById('answerInput');
+  inp.value=''; inp.className='answer-input'; inp.disabled=false; inp.focus();
+  document.getElementById('feedback').textContent='';
+  document.getElementById('checkBtn').disabled=false;
+  document.getElementById('nextBtn').style.display='none';
+}
+function checkAnswer() {
+  const inp=document.getElementById('answerInput');
+  const val=parseInt(inp.value);
+  const correct=questions[qi].ans;
+  if(isNaN(val)) return;
+  inp.disabled=true;
+  document.getElementById('checkBtn').disabled=true;
+  document.getElementById('nextBtn').style.display='inline-flex';
+  if(val===correct){
+    inp.classList.add('correct'); good++; streak++;
+    document.getElementById('feedback').textContent='✓ Goed zo!';
+    document.getElementById('feedback').style.color='var(--accent)';
+    document.getElementById('dot'+qi).classList.add('ok');
+  } else {
+    inp.classList.add('wrong'); wrong++; streak=0;
+    document.getElementById('feedback').textContent=`✗ Het was ${correct}`;
+    document.getElementById('feedback').style.color='var(--danger)';
+    document.getElementById('dot'+qi).classList.add('err');
+  }
+  updateScores();
+}
+function nextQ() { qi++; showQ(); }
+function updateScores() {
+  document.getElementById('scoreGood').textContent=good;
+  document.getElementById('scoreWrong').textContent=wrong;
+  document.getElementById('scoreStreak').textContent=streak;
+}
+function endGame() {
+  document.getElementById('question').textContent='🎉 Klaar!';
+  document.getElementById('answerInput').style.display='none';
+  document.getElementById('checkBtn').style.display='none';
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('qNum').textContent=`Score: ${good} / ${questions.length}`;
+  document.getElementById('feedback').textContent=good===questions.length?'Perfect! 🌟':`Goed gedaan — probeer de tafel nogmaals!`;
+  document.getElementById('feedback').style.color='var(--primary)';
+}
+</script>
+</body>
+</html>

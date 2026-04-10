@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Staafdiagram — Digiboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .chart-wrap { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; }
+    .chart-area { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; }
+    .chart-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+    .chart-canvas-wrap { position: relative; height: 360px; display: flex; align-items: flex-end; gap: 1rem; padding-bottom: 2rem; border-bottom: 2px solid var(--border); }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .4rem; height: 100%; justify-content: flex-end; }
+    .bar { width: 100%; border-radius: 8px 8px 0 0; transition: height .5s cubic-bezier(.34,1.56,.64,1); min-height: 4px; position: relative; cursor: pointer; }
+    .bar-value { position: absolute; top: -24px; left: 50%; transform: translateX(-50%); font-size: .8rem; font-weight: 700; white-space: nowrap; }
+    .bar-label { font-size: .82rem; font-weight: 600; color: var(--text-muted); text-align: center; }
+    .sidebar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; height: fit-content; }
+    .sidebar h3 { margin-bottom: 1rem; font-size: 1rem; }
+    .data-row { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; }
+    .data-row input[type=text] { flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: .45rem .75rem; font-size: .88rem; font-family: var(--font); outline: none; }
+    .data-row input[type=number] { width: 64px; border: 1px solid var(--border); border-radius: 8px; padding: .45rem .5rem; font-size: .88rem; font-family: var(--font); outline: none; text-align: center; }
+    .data-row .rm { cursor: pointer; color: var(--text-light); font-size: .85rem; padding: .3rem; }
+    .data-row .rm:hover { color: var(--danger); }
+    .chart-types { display: flex; gap: .5rem; }
+    .ct-btn { padding: .4rem .9rem; border-radius: 8px; border: 2px solid var(--border); background: var(--bg); font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .15s; }
+    .ct-btn.active { border-color: var(--accent); color: var(--accent); background: #f0fdf4; }
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">📋</div>Digiboard</a>
+    <ul class="nav-links"><li><a href="../index.html#tools">← Terug naar tools</a></li></ul>
+    <div class="nav-actions"><a href="#" class="btn btn-ghost btn-sm">Inloggen</a><a href="#" class="btn btn-primary btn-sm">Gratis starten</a></div>
+  </div>
+</nav>
+<div class="tool-page-header" style="background:linear-gradient(135deg,#064e3b,#10B981)">
+  <div class="tool-page-header-inner">
+    <div class="tool-page-icon">📊</div>
+    <div class="tool-page-meta">
+      <a href="../index.html#tools" class="tool-back">← Alle tools</a>
+      <h1>Staafdiagram</h1>
+      <p>Maak live diagrammen op het digibord voor data en statistiek.</p>
+      <span class="tool-badge">Rekenen</span>
+    </div>
+  </div>
+</div>
+<div class="chart-wrap">
+  <div class="chart-area">
+    <div class="chart-title-row">
+      <div>
+        <input id="chartTitle" type="text" value="Favoriete dieren in groep 5" style="border:none;font-size:1.2rem;font-weight:700;color:var(--text);outline:none;font-family:var(--font);width:100%">
+      </div>
+      <div class="chart-types">
+        <button class="ct-btn active" onclick="setType('bar',this)">Staaf</button>
+        <button class="ct-btn" onclick="setType('horizontal',this)">Horizontaal</button>
+      </div>
+    </div>
+    <div class="chart-canvas-wrap" id="chartArea"></div>
+  </div>
+  <div class="sidebar">
+    <h3>📋 Gegevens</h3>
+    <div id="dataRows"></div>
+    <button class="btn btn-outline btn-sm" style="width:100%;justify-content:center;margin-top:.5rem" onclick="addRow()">+ Rij toevoegen</button>
+    <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+      <h4 style="font-size:.9rem;margin-bottom:.75rem">Kleur thema</h4>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+        <div style="width:24px;height:24px;border-radius:6px;background:#4F46E5;cursor:pointer" onclick="setColor('#4F46E5')"></div>
+        <div style="width:24px;height:24px;border-radius:6px;background:#EF4444;cursor:pointer" onclick="setColor('#EF4444')"></div>
+        <div style="width:24px;height:24px;border-radius:6px;background:#10B981;cursor:pointer" onclick="setColor('#10B981')"></div>
+        <div style="width:24px;height:24px;border-radius:6px;background:#F59E0B;cursor:pointer" onclick="setColor('#F59E0B')"></div>
+        <div style="width:24px;height:24px;border-radius:6px;background:#8B5CF6;cursor:pointer" onclick="setColor('#8B5CF6')"></div>
+        <div style="width:24px;height:24px;border-radius:6px;background:#EC4899;cursor:pointer" onclick="setColor('#EC4899')"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+let chartType = 'bar';
+let barColor = '#10B981';
+const defaultData = [
+  {label:'Hond',value:12},{label:'Kat',value:9},{label:'Konijn',value:6},
+  {label:'Vogel',value:4},{label:'Vis',value:7},{label:'Hamster',value:3}
+];
+let data = [...defaultData];
+
+function setType(t, btn) {
+  chartType = t;
+  document.querySelectorAll('.ct-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderChart();
+}
+function setColor(c) { barColor = c; renderChart(); }
+
+function renderRows() {
+  const container = document.getElementById('dataRows');
+  container.innerHTML = '';
+  data.forEach((d, i) => {
+    const row = document.createElement('div');
+    row.className = 'data-row';
+    row.innerHTML = `
+      <input type="text" value="${d.label}" onchange="data[${i}].label=this.value;renderChart()" />
+      <input type="number" value="${d.value}" min="0" max="999" onchange="data[${i}].value=+this.value;renderChart()" />
+      <span class="rm" onclick="data.splice(${i},1);renderRows();renderChart()">✕</span>`;
+    container.appendChild(row);
+  });
+}
+function addRow() { data.push({label:'Nieuw',value:5}); renderRows(); renderChart(); }
+
+function renderChart() {
+  const area = document.getElementById('chartArea');
+  const max = Math.max(...data.map(d => d.value), 1);
+  area.innerHTML = '';
+  if (chartType === 'bar') {
+    area.style.flexDirection = 'row';
+    area.style.alignItems = 'flex-end';
+    area.style.height = '360px';
+    area.style.paddingBottom = '2rem';
+    data.forEach(d => {
+      const col = document.createElement('div');
+      col.className = 'bar-col';
+      const pct = (d.value / max * 100);
+      col.innerHTML = `<div class="bar" style="height:${pct}%;background:${barColor}"><div class="bar-value" style="color:${barColor}">${d.value}</div></div><div class="bar-label">${d.label}</div>`;
+      area.appendChild(col);
+    });
+  } else {
+    area.style.flexDirection = 'column';
+    area.style.alignItems = 'stretch';
+    area.style.height = 'auto';
+    area.style.paddingBottom = '0';
+    data.forEach(d => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem';
+      const pct = (d.value / max * 100);
+      row.innerHTML = `<div style="width:90px;font-size:.85rem;font-weight:600;color:var(--text-muted);text-align:right">${d.label}</div><div style="flex:1;height:32px;border-radius:0 6px 6px 0;background:${barColor};width:${pct}%;transition:width .5s;min-width:4px"></div><div style="font-size:.85rem;font-weight:700;color:${barColor};min-width:28px">${d.value}</div>`;
+      area.appendChild(row);
+    });
+  }
+}
+renderRows(); renderChart();
+</script>
+</body>
+</html>

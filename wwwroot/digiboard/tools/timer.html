@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timer — Digiboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .timer-wrap {
+      max-width: 680px; margin: 2.5rem auto; padding: 0 1.5rem;
+    }
+    .timer-display {
+      background: linear-gradient(135deg,#1a1a2e,#EF4444 180%);
+      border-radius: var(--radius-lg);
+      padding: 4rem 2rem;
+      text-align: center;
+      box-shadow: 0 12px 48px rgba(239,68,68,.25);
+      margin-bottom: 1.5rem;
+    }
+    .timer-digits {
+      font-size: clamp(5rem,18vw,9rem);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -.04em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .timer-label {
+      color: rgba(255,255,255,.65);
+      font-size: 1rem;
+      margin-top: .75rem;
+      font-weight: 500;
+    }
+    .timer-progress {
+      height: 8px;
+      background: rgba(255,255,255,.2);
+      border-radius: 100px;
+      margin-top: 2rem;
+      overflow: hidden;
+    }
+    .timer-progress-bar {
+      height: 100%;
+      background: #fff;
+      border-radius: 100px;
+      transition: width .9s linear;
+    }
+    .timer-controls {
+      display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem;
+    }
+    .timer-controls button {
+      min-width: 130px; justify-content: center;
+    }
+    .presets {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .presets h4 { margin-bottom: .85rem; font-size: .95rem; color: var(--text-muted); }
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .5rem;
+    }
+    .preset-btn {
+      padding: .65rem .5rem;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+      text-align: center;
+    }
+    .preset-btn:hover { border-color: var(--danger); color: var(--danger); background: #fff5f5; }
+    .custom-row {
+      display: flex; gap: .5rem; align-items: center; margin-top: .85rem;
+    }
+    .custom-row label { font-size: .85rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+    .custom-row input {
+      width: 64px; padding: .5rem; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 1rem; font-weight: 700;
+      text-align: center; outline: none; font-family: var(--font);
+    }
+    .custom-row input:focus { border-color: var(--danger); }
+    .timer-done {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(239,68,68,.92);
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 1rem;
+      z-index: 999; cursor: pointer;
+      animation: flash-in .3s ease;
+    }
+    @keyframes flash-in { from { opacity:0; } to { opacity:1; } }
+    .timer-done h2 { color: #fff; font-size: 3rem; }
+    .timer-done p  { color: rgba(255,255,255,.8); }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">📋</div>Digiboard</a>
+    <ul class="nav-links"><li><a href="../index.html#tools">← Terug naar tools</a></li></ul>
+    <div class="nav-actions">
+      <a href="#" class="btn btn-ghost btn-sm">Inloggen</a>
+      <a href="#" class="btn btn-primary btn-sm">Gratis starten</a>
+    </div>
+  </div>
+</nav>
+
+<div class="tool-page-header" style="background:linear-gradient(135deg,#7f1d1d,#EF4444)">
+  <div class="tool-page-header-inner">
+    <div class="tool-page-icon">⏱️</div>
+    <div class="tool-page-meta">
+      <a href="../index.html#tools" class="tool-back">← Alle tools</a>
+      <h1>Timer</h1>
+      <p>Afteltimer — groot en goed zichtbaar op het digibord.</p>
+      <span class="tool-badge">Klasbeheer</span>
+    </div>
+  </div>
+</div>
+
+<div class="timer-wrap">
+  <div class="timer-display">
+    <div class="timer-digits" id="digits">05:00</div>
+    <div class="timer-label" id="timerLabel">Klaar om te starten</div>
+    <div class="timer-progress"><div class="timer-progress-bar" id="progressBar" style="width:100%"></div></div>
+  </div>
+
+  <div class="timer-controls">
+    <button class="btn btn-primary btn-lg" id="startBtn" onclick="startStop()">▶ Start</button>
+    <button class="btn btn-outline btn-lg" onclick="resetTimer()">↺ Reset</button>
+  </div>
+
+  <div class="presets">
+    <h4>Snelle instelling</h4>
+    <div class="preset-grid">
+      <div class="preset-btn" onclick="setTime(1,0)">1 min</div>
+      <div class="preset-btn" onclick="setTime(2,0)">2 min</div>
+      <div class="preset-btn" onclick="setTime(3,0)">3 min</div>
+      <div class="preset-btn" onclick="setTime(5,0)">5 min</div>
+      <div class="preset-btn" onclick="setTime(10,0)">10 min</div>
+      <div class="preset-btn" onclick="setTime(15,0)">15 min</div>
+      <div class="preset-btn" onclick="setTime(20,0)">20 min</div>
+      <div class="preset-btn" onclick="setTime(30,0)">30 min</div>
+    </div>
+    <div class="custom-row">
+      <label>Eigen tijd:</label>
+      <input type="number" id="customMin" value="5" min="0" max="99" /> min
+      <input type="number" id="customSec" value="0" min="0" max="59" /> sec
+      <button class="btn btn-outline btn-sm" onclick="setCustom()">Instellen</button>
+    </div>
+  </div>
+</div>
+
+<div class="timer-done" id="timerDone" onclick="hideDone()">
+  <div style="font-size:5rem">🔔</div>
+  <h2>Tijd is om!</h2>
+  <p>Klik om te sluiten</p>
+</div>
+
+<script>
+  let totalSecs = 300, remaining = 300, interval = null, running = false;
+
+  function fmt(s) {
+    const m = Math.floor(s/60), sec = s%60;
+    return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  }
+  function render() {
+    document.getElementById('digits').textContent = fmt(remaining);
+    document.getElementById('progressBar').style.width = (remaining/totalSecs*100) + '%';
+  }
+  function startStop() {
+    if (running) {
+      clearInterval(interval); running = false;
+      document.getElementById('startBtn').textContent = '▶ Doorgaan';
+      document.getElementById('timerLabel').textContent = 'Gepauzeerd';
+    } else {
+      if (remaining === 0) return;
+      running = true;
+      document.getElementById('startBtn').textContent = '⏸ Pauze';
+      document.getElementById('timerLabel').textContent = 'Bezig…';
+      interval = setInterval(() => {
+        remaining--;
+        render();
+        if (remaining <= 0) {
+          clearInterval(interval); running = false;
+          document.getElementById('startBtn').textContent = '▶ Start';
+          document.getElementById('timerLabel').textContent = 'Klaar!';
+          document.getElementById('timerDone').style.display = 'flex';
+        }
+      }, 1000);
+    }
+  }
+  function resetTimer() {
+    clearInterval(interval); running = false; remaining = totalSecs;
+    render();
+    document.getElementById('startBtn').textContent = '▶ Start';
+    document.getElementById('timerLabel').textContent = 'Klaar om te starten';
+  }
+  function setTime(m, s) {
+    totalSecs = m*60+s; remaining = totalSecs; resetTimer();
+  }
+  function setCustom() {
+    const m = parseInt(document.getElementById('customMin').value)||0;
+    const s = parseInt(document.getElementById('customSec').value)||0;
+    setTime(m, s);
+  }
+  function hideDone() { document.getElementById('timerDone').style.display = 'none'; }
+</script>
+</body>
+</html>

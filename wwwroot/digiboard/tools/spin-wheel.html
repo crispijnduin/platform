@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Draai het Wiel — Digiboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .spin-wrap {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    .wheel-area {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem;
+      gap: 1.5rem;
+    }
+    .wheel-container { position: relative; }
+    canvas { border-radius: 50%; box-shadow: 0 8px 40px rgba(0,0,0,.15); }
+    .wheel-pointer {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2rem;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,.3));
+      z-index: 10;
+    }
+    .result-box {
+      background: var(--primary-light);
+      border: 2px solid var(--primary);
+      border-radius: var(--radius);
+      padding: 1rem 2rem;
+      text-align: center;
+      min-width: 240px;
+    }
+    .result-box .result-label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--primary); }
+    .result-box .result-name { font-size: 1.6rem; font-weight: 800; color: var(--text); margin-top: .25rem; }
+    .sidebar {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      height: fit-content;
+    }
+    .sidebar h3 { margin-bottom: 1rem; font-size: 1rem; }
+    .items-list { list-style: none; display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1rem; max-height: 340px; overflow-y: auto; }
+    .items-list li {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .5rem .85rem; background: var(--bg); border-radius: 8px; font-size: .9rem; font-weight: 500;
+    }
+    .items-list li .rm { cursor: pointer; color: var(--text-light); font-size: .8rem; }
+    .items-list li .rm:hover { color: var(--danger); }
+    .add-row { display: flex; gap: .5rem; }
+    .add-row input {
+      flex: 1; border: 1px solid var(--border); border-radius: 8px;
+      padding: .5rem .85rem; font-size: .9rem; outline: none; font-family: var(--font);
+    }
+    .add-row input:focus { border-color: var(--warning); }
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">📋</div>Digiboard</a>
+    <ul class="nav-links"><li><a href="../index.html#tools">← Terug naar tools</a></li></ul>
+    <div class="nav-actions">
+      <a href="#" class="btn btn-ghost btn-sm">Inloggen</a>
+      <a href="#" class="btn btn-primary btn-sm">Gratis starten</a>
+    </div>
+  </div>
+</nav>
+
+<div class="tool-page-header" style="background:linear-gradient(135deg,#78350f,#F59E0B)">
+  <div class="tool-page-header-inner">
+    <div class="tool-page-icon">🎡</div>
+    <div class="tool-page-meta">
+      <a href="../index.html#tools" class="tool-back">← Alle tools</a>
+      <h1>Draai het Wiel</h1>
+      <p>Voeg opties toe en draai het wiel — spanning voor de hele klas!</p>
+      <span class="tool-badge">Spelletjes</span>
+    </div>
+  </div>
+</div>
+
+<div class="spin-wrap">
+  <div class="wheel-area">
+    <div class="wheel-container">
+      <div class="wheel-pointer">▼</div>
+      <canvas id="wheelCanvas" width="380" height="380"></canvas>
+    </div>
+    <button class="btn btn-primary btn-lg" id="spinBtn" onclick="spin()">🎡 Draai het wiel!</button>
+    <div class="result-box" id="resultBox">
+      <div class="result-label">Uitkomst</div>
+      <div class="result-name" id="resultName">—</div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <h3>📋 Opties op het wiel</h3>
+    <ul class="items-list" id="itemsList">
+      <li>Emma <span class="rm" onclick="removeItem(this)">✕</span></li>
+      <li>Liam <span class="rm" onclick="removeItem(this)">✕</span></li>
+      <li>Sophie <span class="rm" onclick="removeItem(this)">✕</span></li>
+      <li>Noah <span class="rm" onclick="removeItem(this)">✕</span></li>
+      <li>Mila <span class="rm" onclick="removeItem(this)">✕</span></li>
+      <li>Lars <span class="rm" onclick="removeItem(this)">✕</span></li>
+    </ul>
+    <div class="add-row">
+      <input type="text" id="newItem" placeholder="Optie toevoegen…" onkeydown="if(event.key==='Enter')addItem()" />
+      <button class="btn btn-sm" style="background:var(--warning);color:#fff;border:none;border-radius:8px;cursor:pointer;padding:.5rem .85rem;font-weight:700" onclick="addItem()">+</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:.75rem;justify-content:center" onclick="drawWheel()">↺ Wiel hertekenen</button>
+  </div>
+</div>
+
+<script>
+const COLORS = ['#4F46E5','#EF4444','#F59E0B','#10B981','#8B5CF6','#3B82F6','#EC4899','#F97316','#06B6D4','#84CC16'];
+let spinning = false, currentAngle = 0;
+
+function getItems() {
+  return [...document.querySelectorAll('#itemsList li')].map(li => li.childNodes[0].textContent.trim());
+}
+function drawWheel(highlightIdx = -1) {
+  const items = getItems();
+  if (!items.length) return;
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2, cy = canvas.height / 2, r = cx - 8;
+  const arc = (2 * Math.PI) / items.length;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  items.forEach((item, i) => {
+    const start = currentAngle + i * arc - Math.PI/2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, start + arc);
+    ctx.fillStyle = i === highlightIdx ? '#fff' : COLORS[i % COLORS.length];
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + arc / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = i === highlightIdx ? COLORS[i % COLORS.length] : '#fff';
+    ctx.font = 'bold ' + Math.min(16, 200/items.length + 8) + 'px Inter,sans-serif';
+    ctx.fillText(item.length > 12 ? item.slice(0,11)+'…' : item, r - 14, 5);
+    ctx.restore();
+  });
+  ctx.beginPath();
+  ctx.arc(cx, cy, 24, 0, 2*Math.PI);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+}
+function spin() {
+  if (spinning) return;
+  const items = getItems();
+  if (items.length < 2) { alert('Voeg minstens 2 opties toe!'); return; }
+  spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+  document.getElementById('resultName').textContent = '…';
+  const extra = Math.PI * 2 * (8 + Math.random() * 6);
+  const targetAngle = currentAngle + extra;
+  const duration = 4000;
+  const start = performance.now();
+  const startAngle = currentAngle;
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 4);
+    currentAngle = startAngle + extra * ease;
+    drawWheel();
+    if (t < 1) { requestAnimationFrame(step); return; }
+    currentAngle = targetAngle % (2 * Math.PI);
+    const arc = (2 * Math.PI) / items.length;
+    const normalised = ((-currentAngle % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+    const idx = Math.floor(normalised / arc) % items.length;
+    drawWheel(idx);
+    document.getElementById('resultName').textContent = items[idx];
+    spinning = false;
+    document.getElementById('spinBtn').disabled = false;
+  }
+  requestAnimationFrame(step);
+}
+function addItem() {
+  const input = document.getElementById('newItem');
+  const val = input.value.trim();
+  if (!val) return;
+  const li = document.createElement('li');
+  li.innerHTML = val + ' <span class="rm" onclick="removeItem(this)">✕</span>';
+  document.getElementById('itemsList').appendChild(li);
+  input.value = '';
+  drawWheel();
+}
+function removeItem(el) { el.closest('li').remove(); drawWheel(); }
+drawWheel();
+</script>
+</body>
+</html>

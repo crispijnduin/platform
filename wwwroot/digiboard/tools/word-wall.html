@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Woordmuur — Digiboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ww-wrap { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; }
+    .wall-area { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; min-height: 520px; }
+    .wall-area h3 { margin-bottom: 1.25rem; }
+    .word-cloud { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .word-tile {
+      padding: .45rem 1rem; border-radius: 8px;
+      font-weight: 700; cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      user-select: none; position: relative;
+    }
+    .word-tile:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+    .word-tile .del-btn {
+      display: none; position: absolute; top: -7px; right: -7px;
+      width: 18px; height: 18px; background: var(--danger); color: #fff;
+      border-radius: 50%; font-size: .65rem; align-items: center; justify-content: center;
+      cursor: pointer; font-weight: 800;
+    }
+    .word-tile:hover .del-btn { display: flex; }
+    .sidebar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; height: fit-content; }
+    .sidebar h3 { margin-bottom: 1rem; font-size: 1rem; }
+    .add-word-input { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: .6rem .9rem; font-size: 1rem; font-weight: 700; outline: none; font-family: var(--font); margin-bottom: .5rem; }
+    .add-word-input:focus { border-color: var(--secondary); }
+    .size-btns { display: flex; gap: .4rem; margin-bottom: .75rem; }
+    .size-btn { flex: 1; padding: .45rem; border: 2px solid var(--border); border-radius: 8px; font-size: .82rem; font-weight: 700; cursor: pointer; text-align: center; transition: all .15s; }
+    .size-btn.active { border-color: var(--secondary); color: var(--secondary); background: #faf5ff; }
+    .color-swatches { display: flex; gap: .35rem; flex-wrap: wrap; margin-bottom: .75rem; }
+    .swatch { width: 28px; height: 28px; border-radius: 7px; cursor: pointer; border: 2px solid transparent; transition: border-color .15s; }
+    .swatch.active { border-color: #1e293b; }
+    .words-list { margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+    .words-list h4 { font-size: .9rem; margin-bottom: .6rem; color: var(--text-muted); }
+    .word-list-item { display: flex; align-items: center; justify-content: space-between; padding: .3rem 0; font-size: .88rem; border-bottom: 1px solid var(--border); }
+    .word-list-item span { cursor: pointer; color: var(--text-light); font-size: .75rem; }
+    .word-list-item span:hover { color: var(--danger); }
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-light); }
+    .empty-state .big { font-size: 3.5rem; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">📋</div>Digiboard</a>
+    <ul class="nav-links"><li><a href="../index.html#tools">← Terug naar tools</a></li></ul>
+    <div class="nav-actions"><a href="#" class="btn btn-ghost btn-sm">Inloggen</a><a href="#" class="btn btn-primary btn-sm">Gratis starten</a></div>
+  </div>
+</nav>
+<div class="tool-page-header" style="background:linear-gradient(135deg,#701a75,#EC4899)">
+  <div class="tool-page-header-inner">
+    <div class="tool-page-icon">📝</div>
+    <div class="tool-page-meta">
+      <a href="../index.html#tools" class="tool-back">← Alle tools</a>
+      <h1>Woordmuur</h1>
+      <p>Bouw samen een interactieve woordmuur op het digibord.</p>
+      <span class="tool-badge">Taal</span>
+    </div>
+  </div>
+</div>
+<div class="ww-wrap">
+  <div class="wall-area">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <h3>📌 Woordmuur</h3>
+      <div style="display:flex;gap:.5rem">
+        <button class="btn btn-ghost btn-sm" onclick="clearAll()">Alles wissen</button>
+        <button class="btn btn-outline btn-sm" onclick="shuffle()">🔀 Schudden</button>
+      </div>
+    </div>
+    <div class="word-cloud" id="wordCloud">
+      <div class="empty-state" id="emptyState"><div class="big">📝</div><p>Voeg woorden toe via het zijpaneel</p></div>
+    </div>
+  </div>
+  <div class="sidebar">
+    <h3>Woord toevoegen</h3>
+    <input class="add-word-input" id="wordInput" type="text" placeholder="Typ een woord…" onkeydown="if(event.key==='Enter')addWord()" />
+    <div class="size-btns">
+      <div class="size-btn active" onclick="setSize('sm',this)">Klein</div>
+      <div class="size-btn" onclick="setSize('md',this)">Middel</div>
+      <div class="size-btn" onclick="setSize('lg',this)">Groot</div>
+    </div>
+    <div class="color-swatches" id="swatches"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="addWord()">+ Voeg toe</button>
+    <div class="words-list">
+      <h4>Toegevoegde woorden (<span id="wordCount">0</span>)</h4>
+      <div id="wordListItems"></div>
+    </div>
+  </div>
+</div>
+<script>
+const COLORS = [
+  {bg:'#EEF2FF',text:'#4F46E5'},{bg:'#FFF7ED',text:'#EA580C'},{bg:'#F0FDF4',text:'#16A34A'},
+  {bg:'#FDF4FF',text:'#A21CAF'},{bg:'#FEF9C3',text:'#A16207'},{bg:'#FFE4E6',text:'#E11D48'},
+  {bg:'#CFFAFE',text:'#0E7490'},{bg:'#DCFCE7',text:'#15803D'}
+];
+const SIZES = {sm:'1rem',md:'1.35rem',lg:'1.8rem'};
+let words = [], selectedColor = 0, selectedSize = 'sm';
+
+// Build swatches
+const sw = document.getElementById('swatches');
+COLORS.forEach((c,i) => {
+  const d = document.createElement('div');
+  d.className='swatch' + (i===0?' active':'');
+  d.style.background=c.bg; d.style.border=`2px solid ${c.text}`;
+  d.onclick=()=>{ selectedColor=i; document.querySelectorAll('.swatch').forEach((s,j)=>s.classList.toggle('active',j===i)); };
+  sw.appendChild(d);
+});
+
+function setSize(s, btn) {
+  selectedSize = s;
+  document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function addWord() {
+  const input = document.getElementById('wordInput');
+  const word = input.value.trim();
+  if (!word) return;
+  words.push({text: word, color: selectedColor, size: selectedSize});
+  input.value = '';
+  render();
+}
+function removeWord(i) { words.splice(i,1); render(); }
+function clearAll() { words=[]; render(); }
+function shuffle() { words.sort(()=>Math.random()-.5); render(); }
+
+function render() {
+  const cloud = document.getElementById('wordCloud');
+  const empty = document.getElementById('emptyState');
+  document.getElementById('wordCount').textContent = words.length;
+  if (words.length === 0) { cloud.innerHTML = ''; cloud.appendChild(empty); return; }
+  cloud.innerHTML = '';
+  words.forEach((w,i) => {
+    const c = COLORS[w.color];
+    const tile = document.createElement('div');
+    tile.className = 'word-tile';
+    tile.style.cssText = `background:${c.bg};color:${c.text};font-size:${SIZES[w.size]};border:2px solid ${c.text}20`;
+    tile.innerHTML = `${w.text}<div class="del-btn" onclick="event.stopPropagation();removeWord(${i})">✕</div>`;
+    cloud.appendChild(tile);
+  });
+  // Also update list
+  const list = document.getElementById('wordListItems');
+  list.innerHTML = words.map((w,i)=>`<div class="word-list-item"><span style="color:${COLORS[w.color].text};font-weight:700">${w.text}</span><span onclick="removeWord(${i})">✕</span></div>`).join('');
+}
+
+// Preload some words
+['aap','beer','citroen','deur','eigen','fiets'].forEach(w => words.push({text:w,color:Math.floor(Math.random()*COLORS.length),size:'sm'}));
+render();
+</script>
+</body>
+</html>

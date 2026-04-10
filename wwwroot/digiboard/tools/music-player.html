@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Muziekspeler — Digiboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .music-wrap { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+    .player-card {
+      background: linear-gradient(145deg, #0f172a, #1e3a5f);
+      border-radius: var(--radius-lg); padding: 2.5rem;
+      color: #fff; margin-bottom: 1.5rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    .album-art {
+      width: 160px; height: 160px; border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem; margin: 0 auto 1.5rem;
+      background: rgba(255,255,255,.08);
+      box-shadow: 0 8px 32px rgba(0,0,0,.3);
+    }
+    .album-art.spinning { animation: spin 8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .track-info { text-align: center; margin-bottom: 1.5rem; }
+    .track-title { font-size: 1.5rem; font-weight: 800; }
+    .track-artist { color: rgba(255,255,255,.6); font-size: .95rem; margin-top: .25rem; }
+    .track-category {
+      display: inline-block; margin-top: .5rem;
+      background: rgba(255,255,255,.15); border-radius: 100px;
+      padding: .2rem .75rem; font-size: .78rem; font-weight: 600;
+    }
+    .progress-area { margin-bottom: 1.5rem; }
+    .progress-bar-wrap { background: rgba(255,255,255,.15); border-radius: 100px; height: 6px; cursor: pointer; position: relative; }
+    .progress-fill { height: 100%; border-radius: 100px; background: #06B6D4; transition: width .3s; }
+    .progress-times { display: flex; justify-content: space-between; font-size: .78rem; color: rgba(255,255,255,.5); margin-top: .4rem; }
+    .controls { display: flex; align-items: center; justify-content: center; gap: 1.25rem; margin-bottom: 1.5rem; }
+    .ctrl-btn {
+      width: 48px; height: 48px; border-radius: 50%;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; transition: all .15s;
+      background: rgba(255,255,255,.1); color: #fff;
+    }
+    .ctrl-btn:hover { background: rgba(255,255,255,.2); transform: scale(1.08); }
+    .ctrl-btn.play {
+      width: 64px; height: 64px; font-size: 1.5rem;
+      background: #06B6D4; box-shadow: 0 4px 20px rgba(6,182,212,.4);
+    }
+    .ctrl-btn.play:hover { background: #0891b2; }
+    .volume-row { display: flex; align-items: center; gap: .75rem; }
+    .volume-row span { font-size: 1rem; }
+    input[type=range].vol { flex: 1; accent-color: #06B6D4; height: 4px; }
+    .playlist-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .playlist-header { padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .playlist-header h3 { font-size: 1rem; }
+    .playlist-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .85rem 1.5rem; cursor: pointer;
+      transition: background .15s; border-bottom: 1px solid var(--border);
+    }
+    .playlist-item:last-child { border-bottom: none; }
+    .playlist-item:hover { background: var(--bg); }
+    .playlist-item.active { background: #eff6ff; }
+    .playlist-num { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; background: var(--border); color: var(--text-muted); flex-shrink: 0; }
+    .playlist-item.active .playlist-num { background: var(--primary); color: #fff; }
+    .playlist-info { flex: 1; }
+    .playlist-name { font-size: .92rem; font-weight: 700; color: var(--text); }
+    .playlist-meta { font-size: .78rem; color: var(--text-muted); }
+    .playlist-dur { font-size: .82rem; font-weight: 600; color: var(--text-muted); }
+    .bars { display: flex; gap: 2px; align-items: flex-end; height: 16px; }
+    .bar-anim { width: 3px; border-radius: 2px; background: var(--primary); animation: bar-bounce .6s ease-in-out infinite alternate; }
+    .bar-anim:nth-child(2) { animation-delay: .2s; }
+    .bar-anim:nth-child(3) { animation-delay: .4s; }
+    @keyframes bar-bounce { from { height: 4px; } to { height: 14px; } }
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">📋</div>Digiboard</a>
+    <ul class="nav-links"><li><a href="../index.html#tools">← Terug naar tools</a></li></ul>
+    <div class="nav-actions"><a href="#" class="btn btn-ghost btn-sm">Inloggen</a><a href="#" class="btn btn-primary btn-sm">Gratis starten</a></div>
+  </div>
+</nav>
+<div class="tool-page-header" style="background:linear-gradient(135deg,#0c4a6e,#06B6D4)">
+  <div class="tool-page-header-inner">
+    <div class="tool-page-icon">🎵</div>
+    <div class="tool-page-meta">
+      <a href="../index.html#tools" class="tool-back">← Alle tools</a>
+      <h1>Muziekspeler</h1>
+      <p>Speel achtergrondmuziek af tijdens zelfstandig werken of als beloning.</p>
+      <span class="tool-badge">Muziek</span>
+    </div>
+  </div>
+</div>
+<div class="music-wrap">
+  <div class="player-card">
+    <div class="album-art" id="albumArt">🎵</div>
+    <div class="track-info">
+      <div class="track-title" id="trackTitle">Kies een nummer</div>
+      <div class="track-artist" id="trackArtist">uit de afspeellijst →</div>
+      <span class="track-category" id="trackCat">Muziek</span>
+    </div>
+    <div class="progress-area">
+      <div class="progress-bar-wrap" onclick="seek(event)">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="progress-times">
+        <span id="currentTime">0:00</span>
+        <span id="totalTime">0:00</span>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="ctrl-btn" onclick="prevTrack()" title="Vorige">⏮</button>
+      <button class="ctrl-btn" onclick="toggleShuffle()" id="shuffleBtn" title="Shuffle">🔀</button>
+      <button class="ctrl-btn play" onclick="togglePlay()" id="playBtn">▶</button>
+      <button class="ctrl-btn" onclick="toggleRepeat()" id="repeatBtn" title="Herhalen">🔁</button>
+      <button class="ctrl-btn" onclick="nextTrack()" title="Volgende">⏭</button>
+    </div>
+    <div class="volume-row">
+      <span>🔈</span>
+      <input type="range" class="vol" id="volSlider" min="0" max="100" value="70" oninput="setVol(this.value)" />
+      <span>🔊</span>
+      <span style="font-size:.82rem;color:rgba(255,255,255,.5);min-width:32px" id="volLabel">70%</span>
+    </div>
+  </div>
+
+  <div class="playlist-card">
+    <div class="playlist-header">
+      <h3>🎧 Afspeellijst voor de klas</h3>
+      <span style="font-size:.82rem;color:var(--text-muted)">10 nummers</span>
+    </div>
+    <div id="playlist"></div>
+  </div>
+</div>
+
+<script>
+const tracks = [
+  {emoji:'🎹',title:'Kalme Klassiek',artist:'Piano & Strings',cat:'Klassiek',dur:'3:42'},
+  {emoji:'🌊',title:'Oceaangeluiden',artist:'Natuur & Rust',cat:'Ontspanning',dur:'5:00'},
+  {emoji:'🎸',title:'Vrolijk Akoestisch',artist:'Gitaar Vibes',cat:'Pop',dur:'2:58'},
+  {emoji:'🎺',title:'Jazz voor Kinderen',artist:'Little Jazz Band',cat:'Jazz',dur:'3:15'},
+  {emoji:'🌟',title:'Sterren en Dromen',artist:'Ambient Studio',cat:'Ambient',dur:'4:30'},
+  {emoji:'🥁',title:'Rhythme & Beat',artist:'Drum Circle',cat:'Ritme',dur:'2:44'},
+  {emoji:'🎻',title:'Zachte Strijkers',artist:'Kamerorkest',cat:'Klassiek',dur:'4:10'},
+  {emoji:'🌈',title:'Vrolijke Melodie',artist:'Kids Music Co.',cat:'Kindermuziek',dur:'2:22'},
+  {emoji:'🏔️',title:'Bergstroom',artist:'Natuur Geluiden',cat:'Natuur',dur:'6:00'},
+  {emoji:'🎷',title:'Cool Jazz Café',artist:'The Smooth Quartet',cat:'Jazz',dur:'3:55'},
+];
+
+let currentIdx = 0, playing = false, elapsed = 0, interval = null, shuffle = false, repeat = false;
+
+function buildPlaylist() {
+  const pl = document.getElementById('playlist');
+  pl.innerHTML = tracks.map((t,i) => `
+    <div class="playlist-item ${i===currentIdx?'active':''}" id="pi${i}" onclick="selectTrack(${i})">
+      <div class="playlist-num" id="pn${i}">${i===currentIdx&&playing?`<div class="bars"><div class="bar-anim"></div><div class="bar-anim"></div><div class="bar-anim"></div></div>`:i+1}</div>
+      <div class="playlist-info">
+        <div class="playlist-name">${t.emoji} ${t.title}</div>
+        <div class="playlist-meta">${t.artist} · ${t.cat}</div>
+      </div>
+      <div class="playlist-dur">${t.dur}</div>
+    </div>`).join('');
+}
+
+function selectTrack(i) {
+  currentIdx = i; elapsed = 0;
+  const t = tracks[i];
+  document.getElementById('albumArt').textContent = t.emoji;
+  document.getElementById('trackTitle').textContent = t.title;
+  document.getElementById('trackArtist').textContent = t.artist;
+  document.getElementById('trackCat').textContent = t.cat;
+  const [m,s] = t.dur.split(':').map(Number);
+  document.getElementById('totalTime').textContent = t.dur;
+  if (playing) startTick(m*60+s);
+  buildPlaylist();
+}
+
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('playBtn').textContent = playing ? '⏸' : '▶';
+  document.getElementById('albumArt').classList.toggle('spinning', playing);
+  const t = tracks[currentIdx];
+  const [m,s] = t.dur.split(':').map(Number);
+  const total = m*60+s;
+  if (playing) startTick(total); else clearInterval(interval);
+  buildPlaylist();
+}
+function startTick(total) {
+  clearInterval(interval);
+  interval = setInterval(() => {
+    elapsed++;
+    const pct = Math.min(elapsed/total*100, 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('currentTime').textContent = fmt(elapsed);
+    if (elapsed >= total) { elapsed=0; if(repeat){ startTick(total); } else { nextTrack(); } }
+  }, 1000);
+}
+function prevTrack() { selectTrack((currentIdx-1+tracks.length)%tracks.length); }
+function nextTrack() { selectTrack(shuffle ? Math.floor(Math.random()*tracks.length) : (currentIdx+1)%tracks.length); if(!playing){ togglePlay(); } }
+function toggleShuffle() { shuffle=!shuffle; document.getElementById('shuffleBtn').style.color=shuffle?'#06B6D4':''; }
+function toggleRepeat() { repeat=!repeat; document.getElementById('repeatBtn').style.color=repeat?'#06B6D4':''; }
+function setVol(v) { document.getElementById('volLabel').textContent=v+'%'; }
+function seek(e) { const rect=e.currentTarget.getBoundingClientRect(); const pct=(e.clientX-rect.left)/rect.width; const t=tracks[currentIdx]; const [m,s]=t.dur.split(':').map(Number); elapsed=Math.floor(pct*(m*60+s)); }
+function fmt(s) { return Math.floor(s/60)+':'+(s%60).toString().padStart(2,'0'); }
+buildPlaylist(); selectTrack(0);
+</script>
+</body>
+</html>

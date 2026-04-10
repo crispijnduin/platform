@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Woordraadsel — Digiboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ws-wrap { max-width: 860px; margin: 2rem auto; padding: 0 1.5rem; }
+    .ws-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:1.1rem; text-align:center; }
+    .stat-num { font-size:2rem; font-weight:800; color:var(--primary); }
+    .stat-label { font-size:.8rem; color:var(--text-muted); margin-top:.2rem; }
+    .game-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:2.5rem; text-align:center; margin-bottom:1.5rem; }
+    .category-tag { display:inline-block; background:var(--bg); border:1px solid var(--border); border-radius:100px; padding:.25rem .9rem; font-size:.8rem; font-weight:700; color:var(--text-muted); margin-bottom:1.25rem; }
+    .hint-text { font-size:1rem; color:var(--text-muted); margin-bottom:1.5rem; min-height:1.5rem; }
+    .scrambled-word { font-size:clamp(2rem,8vw,4rem); font-weight:800; letter-spacing:.15em; color:var(--primary); margin-bottom:1.5rem; font-family:monospace; }
+    .letter-tiles { display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.5rem; }
+    .letter-tile {
+      width:52px; height:60px; border-radius:10px;
+      border:2px solid var(--border);
+      background:var(--bg);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.6rem; font-weight:800; cursor:pointer;
+      transition:all .15s; user-select:none;
+      font-family:monospace;
+    }
+    .letter-tile:hover { border-color:var(--primary); background:#eef2ff; transform:translateY(-2px); }
+    .letter-tile.used { opacity:.25; cursor:default; transform:none; pointer-events:none; }
+    .answer-row { display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.5rem; min-height:72px; align-items:center; }
+    .answer-slot {
+      width:52px; height:60px; border-radius:10px;
+      border:2px dashed var(--border);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.6rem; font-weight:800;
+      transition:all .15s; cursor:pointer;
+      font-family:monospace;
+    }
+    .answer-slot.filled { border-color:var(--primary); background:#eef2ff; color:var(--primary); }
+    .answer-slot.correct-anim { border-color:var(--accent); background:#f0fdf4; color:var(--accent); animation:pop .3s cubic-bezier(.34,1.56,.64,1); }
+    .answer-slot.wrong-anim { border-color:var(--danger); background:#fff5f5; animation:shake .3s; }
+    @keyframes pop { from{transform:scale(.8)} to{transform:scale(1)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+    .feedback-area { font-size:1.25rem; font-weight:800; min-height:2rem; margin-bottom:1rem; }
+    .controls-row { display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap; }
+    .category-selector { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; margin-bottom:1.25rem; }
+    .category-selector h3 { margin-bottom:1rem; font-size:1rem; }
+    .cat-btns { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .cat-btn { padding:.45rem 1rem; border:2px solid var(--border); border-radius:100px; font-size:.88rem; font-weight:700; cursor:pointer; background:var(--bg); transition:all .15s; }
+    .cat-btn:hover { border-color:var(--primary); color:var(--primary); }
+    .cat-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .word-revealed { font-size:1.1rem; font-weight:700; color:var(--accent); }
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">📋</div>Digiboard</a>
+    <ul class="nav-links"><li><a href="../index.html#tools">← Terug naar tools</a></li></ul>
+    <div class="nav-actions"><a href="#" class="btn btn-ghost btn-sm">Inloggen</a><a href="#" class="btn btn-primary btn-sm">Gratis starten</a></div>
+  </div>
+</nav>
+<div class="tool-page-header" style="background:linear-gradient(135deg,#064e3b,#10B981)">
+  <div class="tool-page-header-inner">
+    <div class="tool-page-icon">🔤</div>
+    <div class="tool-page-meta">
+      <a href="../index.html#tools" class="tool-back">← Alle tools</a>
+      <h1>Woordraadsel</h1>
+      <p>Ontwar de letters en raad het woord — voor taal en woordenschat.</p>
+      <span class="tool-badge">Taal</span>
+    </div>
+  </div>
+</div>
+<div class="ws-wrap">
+  <div class="ws-stats">
+    <div class="stat-card"><div class="stat-num" id="statGood" style="color:var(--accent)">0</div><div class="stat-label">Goed geraden</div></div>
+    <div class="stat-card"><div class="stat-num" id="statWrong" style="color:var(--danger)">0</div><div class="stat-label">Hints gebruikt</div></div>
+    <div class="stat-card"><div class="stat-num" id="statStreak" style="color:var(--warning)">0</div><div class="stat-label">Serie 🔥</div></div>
+    <div class="stat-card"><div class="stat-num" id="statLeft" style="color:var(--primary)">0</div><div class="stat-label">Resterend</div></div>
+  </div>
+
+  <div class="category-selector">
+    <h3>Categorie kiezen</h3>
+    <div class="cat-btns" id="catBtns"></div>
+  </div>
+
+  <div class="game-card">
+    <div class="category-tag" id="catTag">Kies een categorie</div>
+    <div class="hint-text" id="hintText">Kies hierboven een categorie om te beginnen</div>
+    <div class="letter-tiles" id="letterTiles"></div>
+    <div class="answer-row" id="answerRow"></div>
+    <div class="feedback-area" id="feedback"></div>
+    <div class="controls-row">
+      <button class="btn btn-ghost" onclick="giveHint()" id="hintBtn" disabled>💡 Hint</button>
+      <button class="btn btn-outline" onclick="clearAnswer()" id="clearBtn" disabled>↩ Wis</button>
+      <button class="btn btn-primary" onclick="checkAnswer()" id="checkBtn" disabled>Controleer ✓</button>
+      <button class="btn btn-ghost" onclick="skipWord()" id="skipBtn" disabled>Overslaan →</button>
+    </div>
+    <div style="margin-top:1.5rem" id="nextArea" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const WORDS = {
+  'Dieren': [
+    {word:'OLIFANT', hint:'Het grootste landdier'},
+    {word:'GIRAF', hint:'Heeft een lange nek'},
+    {word:'TIJGER', hint:'Gestreepte grote kat'},
+    {word:'DOLFIJN', hint:'Slim zeezoogdier'},
+    {word:'PAPEGAAI', hint:'Kan praten nadoen'},
+    {word:'SCHILDPAD', hint:'Draagt zijn huis mee'},
+    {word:'KANGOEROE', hint:'Springt en heeft een buidel'},
+    {word:'FLAMINGO', hint:'Roze vogel op één poot'},
+  ],
+  'Fruit': [
+    {word:'BANAAN', hint:'Geel en krom'},
+    {word:'AARDBEI', hint:'Rood en klein met zaadjes'},
+    {word:'ANANAS', hint:'Tropisch met stekelige schil'},
+    {word:'MANGO', hint:'Tropisch, oranje van binnen'},
+    {word:'APPEL', hint:'Rood, groen of geel'},
+    {word:'DRUIVEN', hint:'Groeien in trossen'},
+    {word:'PEER', hint:'Heeft een druppelvorm'},
+    {word:'SINAASAPPEL', hint:'Vol vitamine C'},
+  ],
+  'Landen': [
+    {word:'FRANKRIJK', hint:'Land van de Eiffeltoren'},
+    {word:'DUITSLAND', hint:'Buurland ten oosten'},
+    {word:'SPANJE', hint:'Land van flamenco'},
+    {word:'ITALIE', hint:'Heeft de vorm van een laars'},
+    {word:'PORTUGAL', hint:'Land aan de Atlantische Oceaan'},
+    {word:'BELGIE', hint:'Buurland ten zuiden'},
+    {word:'ZWEDEN', hint:'Scandinavisch land'},
+    {word:'GRIEKENLAND', hint:'Land van de olympische spelen'},
+  ],
+  'School': [
+    {word:'POTLOOD', hint:'Schrijf en gum ermee'},
+    {word:'SCHAAR', hint:'Knipt papier door'},
+    {word:'REKENMACHINE', hint:'Helpt bij sommen'},
+    {word:'RUGZAK', hint:'Draag je spullen erin'},
+    {word:'KLAS', hint:'Ruimte waar je les krijgt'},
+    {word:'TAFEL', hint:'Waaraan je werkt op school'},
+    {word:'RAPPORT', hint:'Staat je cijfers op'},
+    {word:'SCHOOLBEL', hint:'Geeft aan dat het pauze is'},
+  ],
+  'Voertuigen': [
+    {word:'VLIEGTUIG', hint:'Vliegt door de lucht'},
+    {word:'HELIKOPTER', hint:'Heeft een rotor bovenop'},
+    {word:'ONDERZEEBOOT', hint:'Gaat onder water'},
+    {word:'TRACTOR', hint:'Op de boerderij'},
+    {word:'AMBULANCE', hint:'Brengt zieken naar ziekenhuis'},
+    {word:'MOTOR', hint:'Tweewieler met motor'},
+    {word:'VRACHTAUTO', hint:'Vervoert grote ladingen'},
+    {word:'ZWEEFVLIEGTUIG', hint:'Vliegt zonder motor'},
+  ],
+};
+
+let currentCat = null, queue = [], current = null, answer = [], usedIndices = [];
+let good = 0, hints = 0, streak = 0;
+
+// Build category buttons
+const catContainer = document.getElementById('catBtns');
+Object.keys(WORDS).forEach(cat => {
+  const btn = document.createElement('button');
+  btn.className = 'cat-btn';
+  btn.textContent = cat + ' (' + WORDS[cat].length + ')';
+  btn.onclick = () => startCategory(cat, btn);
+  catContainer.appendChild(btn);
+});
+
+function startCategory(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  queue = [...WORDS[cat]].sort(() => Math.random() - .5);
+  good = 0; hints = 0; streak = 0;
+  updateStats();
+  nextWord();
+}
+
+function nextWord() {
+  if (queue.length === 0) {
+    document.getElementById('catTag').textContent = currentCat;
+    document.getElementById('hintText').textContent = 'Alle woorden geraden! Kies een andere categorie.';
+    document.getElementById('letterTiles').innerHTML = '';
+    document.getElementById('answerRow').innerHTML = '';
+    document.getElementById('feedback').innerHTML = '<span style="color:var(--accent)">Geweldig gedaan! 🎉</span>';
+    setButtons(false);
+    return;
+  }
+  current = queue.shift();
+  answer = [];
+  usedIndices = [];
+  document.getElementById('catTag').textContent = currentCat;
+  document.getElementById('hintText').textContent = '💭 ' + current.hint;
+  document.getElementById('feedback').textContent = '';
+  updateStats();
+  renderScrambled();
+  renderAnswerSlots();
+  setButtons(true);
+}
+
+function scramble(word) {
+  const arr = word.split('');
+  let scrambled;
+  do { scrambled = [...arr].sort(() => Math.random() - .5); }
+  while (scrambled.join('') === word && word.length > 1);
+  return scrambled;
+}
+
+function renderScrambled() {
+  const tiles = document.getElementById('letterTiles');
+  const letters = scramble(current.word);
+  tiles.innerHTML = '';
+  letters.forEach((letter, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'letter-tile';
+    tile.textContent = letter;
+    tile.id = 'tile-' + i;
+    tile.dataset.letter = letter;
+    tile.dataset.index = i;
+    tile.onclick = () => pickLetter(i, letter, tile);
+    tiles.appendChild(tile);
+  });
+}
+
+function renderAnswerSlots() {
+  const row = document.getElementById('answerRow');
+  row.innerHTML = '';
+  for (let i = 0; i < current.word.length; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'answer-slot';
+    slot.id = 'slot-' + i;
+    slot.onclick = () => removeFromSlot(i);
+    row.appendChild(slot);
+  }
+}
+
+function pickLetter(tileIdx, letter, tile) {
+  if (tile.classList.contains('used')) return;
+  const slotIdx = answer.length;
+  if (slotIdx >= current.word.length) return;
+  answer.push({letter, tileIdx});
+  usedIndices.push(tileIdx);
+  tile.classList.add('used');
+  const slot = document.getElementById('slot-' + slotIdx);
+  slot.textContent = letter;
+  slot.classList.add('filled');
+}
+
+function removeFromSlot(slotIdx) {
+  if (slotIdx >= answer.length) return;
+  // Remove everything from slotIdx onward
+  const removed = answer.splice(slotIdx);
+  usedIndices.splice(slotIdx);
+  removed.forEach(({tileIdx}) => {
+    document.getElementById('tile-' + tileIdx).classList.remove('used');
+  });
+  for (let i = slotIdx; i < current.word.length; i++) {
+    const slot = document.getElementById('slot-' + i);
+    slot.textContent = '';
+    slot.classList.remove('filled', 'correct-anim', 'wrong-anim');
+  }
+}
+
+function clearAnswer() {
+  answer = []; usedIndices = [];
+  document.querySelectorAll('.letter-tile').forEach(t => t.classList.remove('used'));
+  document.querySelectorAll('.answer-slot').forEach(s => { s.textContent=''; s.className='answer-slot'; });
+  document.getElementById('feedback').textContent = '';
+}
+
+function checkAnswer() {
+  if (answer.length < current.word.length) {
+    document.getElementById('feedback').innerHTML = '<span style="color:var(--warning)">Vul alle letters in!</span>';
+    return;
+  }
+  const attempt = answer.map(a => a.letter).join('');
+  if (attempt === current.word) {
+    good++; streak++;
+    document.getElementById('feedback').innerHTML = '<span style="color:var(--accent)">✓ Correct! Goed gedaan!</span>';
+    document.querySelectorAll('.answer-slot').forEach(s => s.classList.add('correct-anim'));
+    setButtons(false);
+    updateStats();
+    setTimeout(nextWord, 1200);
+  } else {
+    streak = 0;
+    document.getElementById('feedback').innerHTML = '<span style="color:var(--danger)">✗ Niet helemaal goed, probeer opnieuw!</span>';
+    document.querySelectorAll('.answer-slot').forEach(s => s.classList.add('wrong-anim'));
+    setTimeout(() => document.querySelectorAll('.answer-slot').forEach(s => s.classList.remove('wrong-anim')), 400);
+    updateStats();
+  }
+}
+
+function giveHint() {
+  // Place the next correct letter
+  const pos = answer.length;
+  if (pos >= current.word.length) return;
+  const correctLetter = current.word[pos];
+  hints++;
+  // Find an unused tile with this letter
+  const tiles = document.getElementById('letterTiles').children;
+  for (let tile of tiles) {
+    if (!tile.classList.contains('used') && tile.dataset.letter === correctLetter) {
+      pickLetter(parseInt(tile.dataset.index), correctLetter, tile);
+      break;
+    }
+  }
+  document.getElementById('feedback').innerHTML = '<span style="color:var(--warning)">💡 Hint gegeven!</span>';
+  updateStats();
+}
+
+function skipWord() {
+  streak = 0;
+  document.getElementById('feedback').innerHTML = `<span class="word-revealed">Het woord was: ${current.word}</span>`;
+  setButtons(false);
+  updateStats();
+  setTimeout(nextWord, 1500);
+}
+
+function setButtons(enabled) {
+  ['hintBtn','clearBtn','checkBtn','skipBtn'].forEach(id => {
+    document.getElementById(id).disabled = !enabled;
+  });
+}
+
+function updateStats() {
+  document.getElementById('statGood').textContent = good;
+  document.getElementById('statWrong').textContent = hints;
+  document.getElementById('statStreak').textContent = streak;
+  document.getElementById('statLeft').textContent = queue.length + (current ? 1 : 0);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Willekeurige Kiezer — Digiboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    body { background: #F8FAFC; }
+    .tool-app {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .sidebar {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      height: fit-content;
+    }
+    .sidebar h3 { margin-bottom: 1rem; font-size: 1rem; }
+    .names-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+      margin-bottom: 1rem;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .names-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .55rem .85rem;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 500;
+    }
+    .names-list li .remove {
+      cursor: pointer;
+      color: var(--text-light);
+      font-size: .8rem;
+      padding: .2rem .4rem;
+      border-radius: 4px;
+      transition: all .15s;
+    }
+    .names-list li .remove:hover { background: #fee2e2; color: var(--danger); }
+    .add-name-row {
+      display: flex;
+      gap: .5rem;
+    }
+    .add-name-row input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .55rem .85rem;
+      font-size: .9rem;
+      outline: none;
+      font-family: var(--font);
+      transition: border-color .15s;
+    }
+    .add-name-row input:focus { border-color: var(--primary); }
+    .picker-main {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      padding: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .picker-orb {
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      text-align: center;
+      padding: 1rem;
+      box-shadow: 0 8px 40px rgba(79,70,229,.35);
+      cursor: pointer;
+      transition: transform .15s;
+      user-select: none;
+    }
+    .picker-orb:hover { transform: scale(1.03); }
+    .picker-orb.spinning { animation: spin-pulse .6s ease-in-out; }
+    @keyframes spin-pulse {
+      0%   { transform: scale(1); }
+      30%  { transform: scale(.92); }
+      60%  { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+    .picker-name {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 800;
+      color: var(--text);
+      text-align: center;
+      min-height: 3.5rem;
+      display: flex;
+      align-items: center;
+    }
+    .picker-hint { color: var(--text-muted); font-size: .9rem; }
+    .picked-list {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      gap: .4rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: 300px;
+    }
+    .picked-chip {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: .75rem;
+      font-weight: 600;
+      padding: .2rem .65rem;
+      border-radius: 100px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">📋</div>
+      Digiboard
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html#tools">← Terug naar tools</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="#" class="btn btn-ghost btn-sm">Inloggen</a>
+      <a href="#" class="btn btn-primary btn-sm">Gratis starten</a>
+    </div>
+  </div>
+</nav>
+
+<div class="tool-page-header">
+  <div class="tool-page-header-inner">
+    <div class="tool-page-icon">🎲</div>
+    <div class="tool-page-meta">
+      <a href="../index.html#tools" class="tool-back">← Alle tools</a>
+      <h1>Willekeurige Kiezer</h1>
+      <p>Kies willekeurig een leerling, groep of antwoord — eerlijk en transparant.</p>
+      <span class="tool-badge">Klasbeheer</span>
+    </div>
+  </div>
+</div>
+
+<div class="tool-app">
+  <div class="sidebar">
+    <h3>🧑‍🎓 Leerlingen</h3>
+    <ul class="names-list" id="nameList">
+      <li>Emma de Vries <span class="remove" onclick="removeName(this)">✕</span></li>
+      <li>Liam Bakker <span class="remove" onclick="removeName(this)">✕</span></li>
+      <li>Sophie Jansen <span class="remove" onclick="removeName(this)">✕</span></li>
+      <li>Noah Peters <span class="remove" onclick="removeName(this)">✕</span></li>
+      <li>Mila van den Berg <span class="remove" onclick="removeName(this)">✕</span></li>
+      <li>Lars Smit <span class="remove" onclick="removeName(this)">✕</span></li>
+      <li>Ava Visser <span class="remove" onclick="removeName(this)">✕</span></li>
+      <li>Finn de Boer <span class="remove" onclick="removeName(this)">✕</span></li>
+    </ul>
+    <div class="add-name-row">
+      <input type="text" id="newName" placeholder="Naam toevoegen…" onkeydown="if(event.key==='Enter')addName()" />
+      <button class="btn btn-primary btn-sm" onclick="addName()">+</button>
+    </div>
+    <div style="margin-top:1rem;display:flex;gap:.5rem;">
+      <button class="btn btn-ghost btn-sm" onclick="resetPicked()" style="flex:1">Reset</button>
+      <button class="btn btn-outline btn-sm" onclick="clearAll()" style="flex:1">Wis alles</button>
+    </div>
+  </div>
+
+  <div class="picker-main" id="pickerMain">
+    <div class="picker-name" id="pickerName">Wie is de winnaar?</div>
+    <div class="picker-orb" id="pickerOrb" onclick="pickRandom()">
+      Klik om te kiezen
+    </div>
+    <div class="picker-hint">Klik op de bal om een willekeurige leerling te kiezen</div>
+    <div class="picked-list" id="pickedList"></div>
+  </div>
+</div>
+
+<script>
+  let picked = [];
+
+  function getNames() {
+    return [...document.querySelectorAll('#nameList li')].map(li => li.childNodes[0].textContent.trim());
+  }
+  function pickRandom() {
+    const names = getNames().filter(n => !picked.includes(n));
+    if (names.length === 0) { alert('Alle leerlingen zijn al gekozen! Druk op Reset.'); return; }
+    const orb = document.getElementById('pickerOrb');
+    const nameEl = document.getElementById('pickerName');
+    orb.classList.remove('spinning');
+    void orb.offsetWidth;
+    orb.classList.add('spinning');
+
+    let flashes = 0;
+    const interval = setInterval(() => {
+      const r = names[Math.floor(Math.random() * names.length)];
+      nameEl.textContent = r;
+      flashes++;
+      if (flashes > 14) {
+        clearInterval(interval);
+        const chosen = names[Math.floor(Math.random() * names.length)];
+        nameEl.textContent = chosen;
+        picked.push(chosen);
+        const chip = document.createElement('span');
+        chip.className = 'picked-chip';
+        chip.textContent = chosen;
+        document.getElementById('pickedList').appendChild(chip);
+      }
+    }, 80);
+  }
+  function addName() {
+    const input = document.getElementById('newName');
+    const name = input.value.trim();
+    if (!name) return;
+    const li = document.createElement('li');
+    li.innerHTML = name + ' <span class="remove" onclick="removeName(this)">✕</span>';
+    document.getElementById('nameList').appendChild(li);
+    input.value = '';
+  }
+  function removeName(el) { el.closest('li').remove(); }
+  function resetPicked() { picked = []; document.getElementById('pickedList').innerHTML = ''; document.getElementById('pickerName').textContent = 'Wie is de winnaar?'; }
+  function clearAll() { document.getElementById('nameList').innerHTML = ''; resetPicked(); }
+</script>
+
+</body>
+</html>
