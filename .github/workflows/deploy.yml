@@ -1,4 +1,4 @@
-﻿name: Deploy naar IIS
+name: Deploy naar IIS
 
 on:
   push:
@@ -20,8 +20,11 @@ jobs:
       - name: Publish
         run: dotnet publish Platform.csproj -c Release -o "$env:GITHUB_WORKSPACE\publish"
 
-      - name: Stop App Pool
-        run: C:\Windows\System32\inetsrv\appcmd.exe stop apppool /apppool.name:"PlatformPool"
+      - name: Stop worker process
+        run: |
+          Get-Process -Name "w3wp" -ErrorAction SilentlyContinue | Stop-Process -Force
+          Start-Sleep -Seconds 2
+          Write-Host "Worker processes stopped"
 
       - name: Deploy bestanden
         run: |
@@ -29,7 +32,3 @@ jobs:
           $dst = "C:\inetpub\wwwroot\platform"
           robocopy $src $dst /E /IS /PURGE /XD "umbraco\Data\TEMP" "umbraco\Logs" "wwwroot\media"
           if ($LASTEXITCODE -ge 8) { exit 1 }
-
-      - name: Start App Pool
-        if: always()
-        run: C:\Windows\System32\inetsrv\appcmd.exe start apppool /apppool.name:"PlatformPool"
