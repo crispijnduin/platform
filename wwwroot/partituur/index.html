@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tile Board</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Top-right controls (Edit mode) -->
+  <div id="controls">
+    <div class="control-group">
+      <span class="control-label">ROWS</span>
+      <div class="row-buttons">
+        <button class="row-btn active" data-rows="1">1</button>
+        <button class="row-btn" data-rows="2">2</button>
+        <button class="row-btn" data-rows="3">3</button>
+      </div>
+    </div>
+    <button id="btn-fullscreen" title="Fullscreen">
+      <svg id="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+        <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+      </svg>
+      <svg id="icon-shrink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+        <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/>
+        <line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/>
+      </svg>
+    </button>
+    <button id="btn-undo" title="Undo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 14 4 9 9 4"/>
+        <path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+      </svg>
+    </button>
+    <button id="btn-clear" title="Clear board">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6M14 11v6"/>
+        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      </svg>
+    </button>
+    <!-- Whiteboard toggle — always visible, top-right -->
+    <button id="btn-wb" title="Whiteboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>
+    </button>
+    <!-- Music mode toggle — always visible, top-right -->
+    <button id="btn-mode" title="Switch to Rhythm mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18V5l12-2v13"/>
+        <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Rhythm mode controls — top-left -->
+  <div id="rhythm-controls" class="hidden">
+
+    <!-- Playback -->
+    <button id="btn-play" title="Play (Space)">
+      <svg id="icon-play" viewBox="0 0 24 24" fill="currentColor">
+        <polygon points="5,3 19,12 5,21"/>
+      </svg>
+      <svg id="icon-stop" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+        <rect x="4" y="4" width="16" height="16" rx="2"/>
+      </svg>
+    </button>
+
+    <!-- Tempo -->
+    <div class="control-group" id="tempo-group">
+      <span class="control-label">BPM</span>
+      <input type="range" id="tempo-slider" min="60" max="240" value="180" step="1" />
+      <span id="tempo-display">180</span>
+    </div>
+
+    <!-- Toggle: auto-repeat -->
+    <button id="btn-repeat" title="Auto-repeat" class="toggle-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="17 1 21 5 17 9"/>
+        <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+        <polyline points="7 23 3 19 7 15"/>
+        <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+      </svg>
+    </button>
+
+    <!-- Toggle: show notes -->
+    <button id="btn-show-notes" title="Show note symbols" class="toggle-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18V5l12-2v13"/>
+        <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+      </svg>
+    </button>
+
+    <!-- Toggle: show syllables -->
+    <button id="btn-show-syls" title="Show syllables" class="toggle-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+    </button>
+
+    <!-- Toggle: show ball -->
+    <button id="btn-show-ball" title="Show bouncing ball" class="toggle-btn">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="12" r="7"/>
+      </svg>
+    </button>
+
+    <!-- Toggle: sound -->
+    <button id="btn-sound" title="Sound on/off" class="toggle-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+      </svg>
+    </button>
+
+    <!-- Fullscreen -->
+    <button id="btn-fullscreen-r" title="Fullscreen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+        <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+      </svg>
+    </button>
+
+  </div>
+
+  <!-- Main board -->
+  <div id="board">
+    <div id="board-grid"></div>
+    <div id="placeholder-text">Drag tiles here</div>
+  </div>
+
+  <!-- Bouncing ball -->
+  <div id="bounce-ball" class="hidden"></div>
+
+  <!-- Whiteboard overlay -->
+  <canvas id="wb-canvas"></canvas>
+
+  <!-- Whiteboard floating toolbar -->
+  <div id="wb-toolbar" class="hidden">
+    <button id="wb-pen"   class="wb-tool active" title="Pen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>
+    </button>
+    <button id="wb-eraser" class="wb-tool" title="Eraser">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 20H7L3 16l11-11 6 6-3.5 3.5"/>
+        <path d="M6.5 17.5l-3-3"/>
+      </svg>
+    </button>
+    <button id="wb-clear" title="Clear all">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Count-in overlay (kept in DOM, never shown without countdown) -->
+  <div id="countin" class="hidden">
+    <div id="countin-number"></div>
+  </div>
+
+  <!-- Bottom tray -->
+  <div id="tray">
+    <div id="tray-inner"></div>
+  </div>
+
+  <!-- Bin -->
+  <div id="bin">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="3 6 5 6 21 6"/>
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+      <path d="M10 11v6M14 11v6"/>
+    </svg>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="hidden">
+    <div id="modal-box">
+      <span id="modal-msg">Board is full — try adding a row!</span>
+    </div>
+  </div>
+
+  <script src="tilelist.js"></script>
+  <script src="app.js"></script>
+  <script src="rhythm.js"></script>
+  <script src="whiteboard.js"></script>
+</body>
+</html>

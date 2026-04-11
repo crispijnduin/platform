@@ -45,6 +45,7 @@ public class PlatformMigratieComponent : IComponent
     {
         var plan = new MigrationPlan("PlatformDocumentTypes");
         plan.From(string.Empty).To<DocumentTypesMigratie>("v1.0.0");
+        plan.From("v1.0.0").To<ContentMigratie>("v1.1.0");
 
         var upgrader = new Upgrader(plan);
         upgrader.Execute(_migrationPlanExecutor, _coreScopeProvider, _keyValueService);
